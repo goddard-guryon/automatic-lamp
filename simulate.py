@@ -84,7 +84,7 @@ def get_velocities(pos, vel, singles, pairs, n_ix, edges):
     return vel
 
 
-def fix_delta(pos, vel, r, edges, l, epsilon=1e-2):
+def fix_delta(pos, vel, r, edges, l):
     """
     Basically bug fixes:
     - there may be disks that didn't collide with wall,
@@ -95,31 +95,27 @@ def fix_delta(pos, vel, r, edges, l, epsilon=1e-2):
     x, y = pos
     i, j = [int(a) for a in pos]
     if not l:
-        if x < i+1 < x+r:
+        if x < i+1 < x+r and vel[l] > 0:
             loc = [((i+1, j), (i+1, j+1)), ((i+1, j+1), (i+1, j))]
             if any(a in edges for a in loc):
                 vel[l] *= -1
-        elif x-r < i < x:
+        elif x-r < i < x and vel[l] < 0:
             loc = [((i, j), (i, j+1)), ((i, j+1),(i, j))]
             if any(a in edges for a in loc):
                 vel[l] *= -1
     else:
-        if y < j+1 < y+r:
+        if y < j+1 < y+r and vel[l] > 0:
             loc = [((i, j+1), (i+1, j+1)), ((i+1, j+1), (i, j+1))]
             if any(a in edges for a in loc):
                 vel[l] *= -1
-        elif y-r < j < y:
+        elif y-r < j < y and vel[l] < 0:
             loc = [((i, j), (i+1, j)), ((i+1, j), (i, j))]
             if any(a in edges for a in loc):
                 vel[l] *= -1
-
-    # not working, find some other solution
-    if abs(pos[l]-int(pos[l])) <= epsilon:
-        pos[l] += uniform(-epsilon, epsilon)
     return pos[l], vel[l]
 
 
-def save_img(i, p, v, r, edges, output_dir, arrow_scale=.2):
+def save_img(i, p, v, r, edges, output_dir, with_arrows, arrow_scale=.2):
     """
     Save a snapshot of simulation
     """
@@ -133,17 +129,18 @@ def save_img(i, p, v, r, edges, output_dir, arrow_scale=.2):
         dy *= arrow_scale
         circle = plt.Circle((x, y), radius=r)
         plt.gca().add_patch(circle)
-        plt.arrow(x, y, dx, dy, fc='k', ec='k', head_length=.05, head_width=.05)
+        if with_arrows:
+            plt.arrow(x, y, dx, dy, fc='k', ec='k', head_length=.05, head_width=.05)
     plt.savefig(os.path.join(output_dir, f"{i}.png"))
     return 0
 
 
-def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, out="simulation_snapshots"):
+def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out="simulation_snapshots"):
     """
     Run Molecular Dynamics simulation
     """
-    # for debugging
-    roof = int(p[0][1])+1
+    # find the exit point
+    exit_x, exit_y = max(x[1][0] for x in edges), 0
 
     sg, pr = get_sg_pr(n)
 
@@ -154,7 +151,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, out="simulation_snapsho
     t, i = 0, 0
 
     next_event, next_event_ix = get_next_event(p, v, sg, pr, r, edges)
-    save_img(i, p, v, r, edges, out)
+    save_img(i, p, v, r, edges, out, with_arrows)
     i += 1
     for _ in range(n_events):
         if dt:
@@ -180,17 +177,15 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, out="simulation_snapsho
         next_event -= remain_t
 
         if not i%2000:
-            save_img(i//2000, p, v, r, edges, out)
+            save_img(i//2000, p, v, r, edges, out, with_arrows)
         i += 1
         print(f"\033[KSimulating timestep {t:.5f} s\r", end='', flush=True)
 
-        # code is still buggy; halt if disks break out of maze
-        for a in p:
-            if a[0]+r < 0 or a[0]-r > roof or a[1]-r > roof or (a[1]+r < 0 and roof-1<a[0]<roof):
-                save_img(i, p, v, r, edges, out)
-                print("Bugged run; halting")
-                return 1
-
+        # check if any particle has reached the exit
+        for pos in p:
+            if exit_x-1 < pos[0] < exit_x and pos[1] < exit_y:
+                print("\A particle solved the maze! Halting")
+                return 0
     # convert all snapshots to video
     #print("\nConverting simulation data to video")
     #imgs = sorted([f for f in os.listdir(out) if f.endswith(".png")],
@@ -200,12 +195,5 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, out="simulation_snapsho
     #for img in imgs:
     #    video.write(cv2.imread(f"{out}/{img}"))
     #video.release()
-    print("Done")
+    print("\nFinished simulation")
     return 0
-
-
-radius = .1
-positions = [[0.25, 10.25], [0.75, 10.25], [0.25, 10.75], [0.75, 10.75]]
-velocities = [[0.21, 0.12], [0.71, 0.18], [-.43, -.59], [0.78, 0.1177]]
-grid = make_maze(10)
-run_simulation(4, positions, velocities, radius, grid, 1000000)

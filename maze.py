@@ -2,7 +2,6 @@
 Create a 2D maze
 """
 from random import uniform, choice
-from matplotlib import pyplot as plt
 
 
 def fix_path(n, is_in_path, conns):
