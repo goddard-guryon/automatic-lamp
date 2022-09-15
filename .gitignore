@@ -1,3 +1,4 @@
 simulation_snapshots/
 checks/
 __pycache__/
+simulation.log

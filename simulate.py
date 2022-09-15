@@ -36,7 +36,7 @@ def wall_time(pos, v, r, k, l, edges):
             loc = [((i, j), (i+1, j)), ((i+1, j), (i, j))]
     if any(a in edges for a in loc):
         if v > 0:
-            return abs(-(x%(-1))-r)/v
+            val = (-(x%(-1))-r)/v
             if val > 0:
                 return val
             return abs(val)
@@ -66,10 +66,10 @@ def get_next_event(p, v, singles, pairs, s, edges):
     """
     walls = [wall_time(p, v[k][l], s, k, l, edges) for k, l in singles]
     pairs = [pair_time(p[k], v[k], p[l], v[l], s) for k, l in pairs]
-    return walls+pairs, min(zip(walls+pairs, range(len(walls+pairs))))
+    return min(zip(walls+pairs, range(len(walls+pairs))))
 
 
-def get_velocities(pos, vel, singles, pairs, n_ix, edges):
+def get_velocities(pos, vel, singles, pairs, n_ix):
     """
     Change velocities after event
     """
@@ -92,11 +92,9 @@ def get_velocities(pos, vel, singles, pairs, n_ix, edges):
 
 def fix_delta(pos, vel, r, edges, l):
     """
-    Basically bug fixes:
+    Basically bug fix:
     - there may be disks that didn't collide with wall,
       and are now overlapping with it; bounce em back
-    - disks tend to stick to walls if they hit at certain
-      angles; unstick them
     """
     x, y = pos
     i, j = [int(a) for a in pos]
@@ -119,6 +117,23 @@ def fix_delta(pos, vel, r, edges, l):
             if any(a in edges for a in loc):
                 vel[l] *= -1
     return vel[l]
+
+
+def pull_apart(pos, vel, r, singles, pairs, n_ix):
+    """
+    Another bug fix:
+    - if, by chance, two disks are overlapping,
+      pull them apart
+    """
+    a, b = pairs[n_ix - len(singles)]
+    for k in range(2):
+        if pos[a][k] > pos[b][k]:
+            pos[a][k] += r
+            pos[b][k] -= r
+        else:
+            pos[a][k] -= r
+            pos[b][k] += r
+    return pos, vel
 
 
 def save_img(i, p, v, r, edges, output_dir, with_arrows, arrow_scale=.2, ex=None, ey=None):
@@ -152,7 +167,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out=
     Run Molecular Dynamics simulation
     """
     # find the exit point
-    max_x, max_y = max(x[1][0] for x in edges), max(x[1][1] for x in edges)
+    max_x = max(x[1][0] for x in edges)
 
     sg, pr = get_sg_pr(n)
 
@@ -162,28 +177,28 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out=
             os.remove(f"{out}/{file}")
     t, i = 0, 0
 
-    w, (next_event, next_event_ix) = get_next_event(p, v, sg, pr, r, edges)
+    next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
     save_img(i, p, v, r, edges, out, with_arrows)
     i += 1
     for _ in range(n_events):
         if dt:
             next_t = t + dt
         else:
-            next_t = t + next_event
+            next_t = t + next_e
 
         q = 0
         v_old = v
-        while t+next_event <= next_t:
+        while t+next_e <= next_t:
             print(f"\033[KSimulating timestep {t:.5f} s; run {q}\r", end='', flush=True)
             if q > 100 and all(abs(v[k][l]) == abs(v_old[k][l]) for k, l in sg):
 
                 # clearly, we're just stuck here, doing nothing,
                 # so just skip to next event
-                step = max(dt, next_event)
+                step = max(dt, next_e)
             else:
 
                 # but if not, iterate over the smallest timestep
-                step = min(dt, next_event)
+                step = min(dt, next_e)
             q += 1
             t += step
             for k, l in sg:
@@ -198,21 +213,17 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out=
                 file.write('Velocities\n')
                 for vel in v:
                     file.write(''.join(str(vel))+ '\n')
-            v = get_velocities(p, v, sg, pr, next_event_ix, edges)
-            w, (next_event, next_event_ix) = get_next_event(p, v, sg, pr, r, edges)
-            if next_event < 0:
-                with open("simulation.log", 'a') as file:
-                    file.write(f"{t}, {i}, {next_event}")
-                    for line in w:
-                        file.write(str(line) + ' ')
-                return 1
+            v = get_velocities(p, v, sg, pr, next_e_i)
+            next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
+            if next_e < 0 and next_e_i > len(sg):
+                p, v = pull_apart(p, v, r, sg, pr, next_e_i)
             v_old = v
         remain_t = next_t - t
         for k, l in sg:
             v[k][l] = fix_delta(p[k], v[k], r, edges, l)
             p[k][l] += v[k][l]*remain_t
         t += remain_t
-        next_event -= remain_t
+        next_e -= remain_t
 
         if not i%2000:
             save_img(i//2000, p, v, r, edges, out, with_arrows)
