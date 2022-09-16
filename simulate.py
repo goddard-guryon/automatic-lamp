@@ -3,10 +3,6 @@ EdMD simulation
 """
 import os
 from math import sqrt
-from random import uniform
-from maze import make_maze
-import matplotlib.pyplot as plt
-import cv2
 
 
 def get_sg_pr(n):
@@ -16,6 +12,19 @@ def get_sg_pr(n):
     walls = [(a, b) for a in range(n) for b in range(2)]
     pairs = [(a, b) for a in range(n) for b in range(a+1, n)]
     return walls, pairs
+
+
+def save_log(logfile, t, i, pos, vel):
+    """
+    Save simulation data in log file
+    """
+    with open(logfile, 'a') as file:
+        file.write(f"time: {t} i: {i}\n")
+        for p in pos:
+            file.write(f"pos {p[0]} {p[1]}\n")
+        for v in vel:
+            file.write(f"vel {v[0]} {v[1]}\n")
+    return 0
 
 
 def wall_time(pos, v, r, k, l, edges):
@@ -136,33 +145,7 @@ def pull_apart(pos, vel, r, singles, pairs, n_ix):
     return pos, vel
 
 
-def save_img(i, p, v, r, edges, output_dir, with_arrows, arrow_scale=.2, ex=None, ey=None):
-    """
-    Save a snapshot of simulation
-    """
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-    plt.clf()
-    plt.xticks([])
-    plt.yticks([])
-    for e in edges:
-        plt.plot([e[0][0], e[1][0]], [e[0][1], e[1][1]], "b-")
-    for (x, y), (dx, dy) in zip(p, v):
-        dx *= arrow_scale
-        dy *= arrow_scale
-        col = 'b'
-        if ex and ey:
-            if ex-1 < x < ex and y+r < ey:
-                col = 'r'
-        circle = plt.Circle((x, y), radius=r, fc=col)
-        plt.gca().add_patch(circle)
-        if with_arrows:
-            plt.arrow(x, y, dx, dy, fc='k', ec='k', head_length=.05, head_width=.05)
-    plt.savefig(os.path.join(output_dir, f"{i}.png"))
-    return 0
-
-
-def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out="simulation_snapshots"):
+def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
     """
     Run Molecular Dynamics simulation
     """
@@ -178,7 +161,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out=
     t, i = 0, 0
 
     next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
-    save_img(i, p, v, r, edges, out, with_arrows)
+    save_log(logfile, t, i, p, v)
     i += 1
     for _ in range(n_events):
         if dt:
@@ -189,7 +172,6 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out=
         q = 0
         v_old = v
         while t+next_e <= next_t:
-            print(f"\033[KSimulating timestep {t:.5f} s; run {q}\r", end='', flush=True)
             if q > 100 and all(abs(v[k][l]) == abs(v_old[k][l]) for k, l in sg):
 
                 # clearly, we're just stuck here, doing nothing,
@@ -202,17 +184,8 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out=
             q += 1
             t += step
             for k, l in sg:
-
-                # for debugging
                 v[k][l] = fix_delta(p[k], v[k], r, edges, l)
                 p[k][l] += v[k][l]*step
-            with open("simulation.log", 'a') as file:
-                file.write(f"time: {t}, i: {i}\nPositions:\n")
-                for pos in p:
-                    file.write(''.join(str(pos)) + '\n')
-                file.write('Velocities\n')
-                for vel in v:
-                    file.write(''.join(str(vel))+ '\n')
             v = get_velocities(p, v, sg, pr, next_e_i)
             next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
             if next_e < 0 and next_e_i > len(sg):
@@ -225,25 +198,16 @@ def run_simulation(n, p, v, r, edges, n_events, dt=5e-5, with_arrows=False, out=
         t += remain_t
         next_e -= remain_t
 
-        if not i%2000:
-            save_img(i//2000, p, v, r, edges, out, with_arrows)
+        if not i%stepsize:
+            save_log(logfile, t, i//stepsize, p, v)
         i += 1
-        print(f"\033[KSimulating timestep {t:.5f} s\r", end='', flush=True)
+        if not i%(stepsize//10):
+            print(f"\033[KSimulating timestep {t:.5f} s\r", end='', flush=True)
 
         # check if any particle has reached the exit
         for pos in p:
             if max_x-1 < pos[0] < max_x and pos[1]+r < 0:
-                save_img("final", p, v, r, edges, out, with_arrows, max_x, 0)
                 print(f"\nTimestep {t:.5f}; a particle solved the maze! Halting")
-                return 0
-    # convert all snapshots to video
-    #print("\nConverting simulation data to video")
-    #imgs = sorted([f for f in os.listdir(out) if f.endswith(".png")],
-    #              key=lambda x: int(x.split('.')[0]))
-    #height, width, _ = cv2.imread(f"{out}/{imgs[0]}").shape
-    #video = cv2.VideoWriter(f"{out}/animation.avi", 0, 20, (width, height))
-    #for img in imgs:
-    #    video.write(cv2.imread(f"{out}/{img}"))
-    #video.release()
+                return t
     print("\nFinished simulation")
-    return 0
+    return t
