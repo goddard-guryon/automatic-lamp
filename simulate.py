@@ -116,6 +116,14 @@ def fix_delta(pos, vel, r, edges, l):
             loc = [((i, j), (i, j+1)), ((i, j+1),(i, j))]
             if any(a in edges for a in loc):
                 vel[l] *= -1
+        if y < j+1 < y+r and vel[1] == 0:
+            loc = [((i, j+1), (i+1, j+1)), ((i+1, j+1), (i, j+1))]
+            if any(a in edges for a in loc):
+                pos[1] -= r
+        elif y-r < j < y and vel[1] == 0:
+            loc = [((i, j), (i+1, j)), ((i+1, j), (i, j))]
+            if any(a in edges for a in loc):
+                pos[1] += r
     else:
         if y < j+1 < y+r and vel[l] > 0:
             loc = [((i, j+1), (i+1, j+1)), ((i+1, j+1), (i, j+1))]
@@ -125,7 +133,15 @@ def fix_delta(pos, vel, r, edges, l):
             loc = [((i, j), (i+1, j)), ((i+1, j), (i, j))]
             if any(a in edges for a in loc):
                 vel[l] *= -1
-    return vel[l]
+        if x < i+1 < x+r and vel[0] == 0:
+            loc = [((i+1, j), (i+1, j+1)), ((i+1, j+1), (i+1, j))]
+            if any(a in edges for a in loc):
+                pos[0] -= r
+        elif x-r < i < x and vel[0] == 0:
+            loc = [((i, j), (i, j+1)), ((i, j+1),(i, j))]
+            if any(a in edges for a in loc):
+                pos[0] += r
+    return pos, vel[l]
 
 
 def pull_apart(pos, vel, r, singles, pairs, n_ix):
@@ -155,7 +171,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
     sg, pr = get_sg_pr(n)
 
     if os.path.isdir(out):
-        print("Output directory already exists, deleting any files within it...")
+        print("I: Output directory already exists, deleting any files within it...")
         for file in os.listdir(out):
             os.remove(f"{out}/{file}")
     t, i = 0, 0
@@ -184,7 +200,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
             q += 1
             t += step
             for k, l in sg:
-                v[k][l] = fix_delta(p[k], v[k], r, edges, l)
+                p[k], v[k][l] = fix_delta(p[k], v[k], r, edges, l)
                 p[k][l] += v[k][l]*step
             v = get_velocities(p, v, sg, pr, next_e_i)
             next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
@@ -193,7 +209,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
             v_old = v
         remain_t = next_t - t
         for k, l in sg:
-            v[k][l] = fix_delta(p[k], v[k], r, edges, l)
+            p[k], v[k][l] = fix_delta(p[k], v[k], r, edges, l)
             p[k][l] += v[k][l]*remain_t
         t += remain_t
         next_e -= remain_t
@@ -202,12 +218,12 @@ def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
             save_log(logfile, t, i//stepsize, p, v)
         i += 1
         if not i%(stepsize//10):
-            print(f"\033[KSimulating timestep {t:.5f} s\r", end='', flush=True)
+            print(f"\033[KI: Simulating timestep {t:.5f} s\r", end='', flush=True)
 
         # check if any particle has reached the exit
         for pos in p:
-            if max_x-1 < pos[0] < max_x and pos[1]+r < 0:
-                print(f"\nTimestep {t:.5f}; a particle solved the maze! Halting")
-                return t
-    print("\nFinished simulation")
-    return t
+            if max_x-2 < pos[0] < max_x+1 and pos[1]+r < 0:
+                print(f"\nI: Timestep {t:.5f}; a particle solved the maze! Halting")
+                return t, 1
+    print(f"\nI: Finished simulation for {t} timesteps")
+    return t, 0

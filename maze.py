@@ -129,20 +129,20 @@ def make_maze(m, n=0):
     Main function to make 2D maze
     """
     # all that's left is adding an entry and exit point
-    if not n:
+    if n == 0:
         n = m
     edges = maze_grid(m, n)
 
     # entry point
-    edges.append(((0, m), (0, m+1)))
-    edges.append(((0, m+1), (1, m+1)))
-    edges.append(((1, m+1), (1, m)))
-    edges.append(((0, m+1), (0, m)))
-    edges.append(((1, m+1), (0, m+1)))
-    edges.append(((1, m), (1, m+1)))
+    edges.append(((0, n), (0, n+1)))
+    edges.append(((0, n+1), (1, n+1)))
+    edges.append(((1, n+1), (1, n)))
+    edges.append(((0, n+1), (0, n)))
+    edges.append(((1, n+1), (0, n+1)))
+    edges.append(((1, n), (1, n+1)))
 
     # make way
-    for rem in [((0, m), (1, m)), ((1, m), (0, m)), ((n-1, 0), (n, 0)), ((n, 0), (n-1, 0))]:
+    for rem in [((0, n), (1, n)), ((1, n), (0, n)), ((m-1, 0), (m, 0)), ((m, 0), (m-1, 0))]:
         while rem in edges:
             edges.remove(rem)
 

@@ -1,12 +1,14 @@
 """
 Interface file
 """
-from argparse import ArgumentParser
+from sys import argv
+from argparse import ArgumentParser, MetavarTypeHelpFormatter
 from wrapper import MazeDiffusion
 
 
 cli = ArgumentParser(description="Gas Diffusion in a 2D Maze",
-                     epilog="More information at https://github.com/goddard-guryon/automatic-lamp")
+                     epilog="More information at https://github.com/goddard-guryon/automatic-lamp",
+                     formatter_class=MetavarTypeHelpFormatter)
 cli.add_argument("--num",
                  default=10, type=int,
                  help="Number of particles to simulate (default: 10)")
@@ -53,12 +55,21 @@ cli.add_argument("--vel_o",
 cli.add_argument("--maze_o",
                  default=None, type=str,
                  help="Filename to save maze wall coordinates in (default: None)")
+cli.add_argument("--no_sim",
+                 default=False, type=bool,
+                 help="Skip any simulation (default: False)")
+cli.add_argument("--no_snap",
+                 default=False, type=bool,
+                 help="Skip saving any simulation snapshots (default: False)")
+cli.add_argument("--no_trace",
+                 default=False, type=bool,
+                 help="Skip saving the trace path of exiting particle (default: False)")
 
 
+args = cli.parse_args(args=None if argv[1:] else ["--help"])
 print(cli.description)
 cli.print_usage()
 print()
-args = cli.parse_args()
 arg_dct = {"dt": args.dt,
            "logfile": args.logfile,
            "snapdir": args.snapdir,
@@ -68,12 +79,15 @@ arg_dct = {"dt": args.dt,
            "pos": args.pos_i,
            "vel": args.vel_i}
 instance = MazeDiffusion(args.num, args.height, args.width, **arg_dct)
-instance.initialize()
-instance.simulate(args.duration)
+if not args.no_sim:
+    instance.simulate(args.duration)
 print()
 print(instance)
 print()
-instance.make_snaps()
+if not args.no_snap:
+    instance.make_snaps()
+if not args.no_trace:
+    instance.trace_path()
 if args.pos_o:
     instance.save_pos(args.pos_o)
 if args.vel_o:
