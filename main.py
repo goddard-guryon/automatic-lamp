@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 Interface file
 """
@@ -6,7 +7,8 @@ from argparse import ArgumentParser, MetavarTypeHelpFormatter
 from wrapper import MazeDiffusion
 
 
-cli = ArgumentParser(description="Gas Diffusion in a 2D Maze",
+cli = ArgumentParser(prog="maze_diffusion",
+                     description="Gas Diffusion in a 2D Maze",
                      epilog="More information at https://github.com/goddard-guryon/automatic-lamp",
                      formatter_class=MetavarTypeHelpFormatter)
 cli.add_argument("--num",
@@ -25,6 +27,9 @@ cli.add_argument("--duration",
 cli.add_argument("--stepsize",
                  default=2000, type=int,
                  help="Save plots every x iterations (default: 2000)")
+cli.add_argument("--pressure_factor",
+                 default=0, type=int,
+                 help="Apply pressure from the entry point. Takes values between 0-5 (default: 0)")
 cli.add_argument("--dt",
                  default=5e-5, type=float,
                  help="Size of one simulation step (default: 5e-5)")
@@ -39,10 +44,10 @@ cli.add_argument("--arrows",
                  help="Whether to draw velocity arrows in simulation snapshots (default: False)")
 cli.add_argument("--pos_i",
                  default=None, type=str,
-                 help="File containing initial positions of particles to import from (default: None)")
+                 help="Input file containing initial positions of particles (default: None)")
 cli.add_argument("--vel_i",
                  default=None, type=str,
-                 help="File containing initial velocities of particles to import from (default: None)")
+                 help="Input file containing initial velocities of particles (default: None)")
 cli.add_argument("--maze_i",
                  default=None, type=str,
                  help="File containing maze wall coordinates to import from (default: None)")
@@ -76,8 +81,9 @@ arg_dct = {"dt": args.dt,
            "stepsize": args.stepsize,
            "with_arrows": args.arrows,
            "maze": args.maze_i,
-           "pos": args.pos_i,
-           "vel": args.vel_i}
+           "positions": args.pos_i,
+           "velocities": args.vel_i,
+           "pressure_factor": args.pressure_factor}
 instance = MazeDiffusion(args.num, args.height, args.width, **arg_dct)
 if not args.no_sim:
     instance.simulate(args.duration)

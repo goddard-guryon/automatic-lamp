@@ -6,7 +6,7 @@ from math import sqrt, pi
 from multiprocessing import Pool
 from maze import make_maze
 from initialize import initial_pos, initial_vel
-from simulate import run_simulation
+from simulate import run_simulation, simulation_with_fan
 from plot import save_snap, make_video, plot_trace_path
 
 
@@ -27,6 +27,7 @@ class MazeDiffusion:
         self.pos = kwargs.get("positions", None)
         self.vel = kwargs.get("velocities", None)
         self.grid = kwargs.get("maze", None)
+        self.fan_speed = kwargs.get("pressure_factor", 0)
         self.initialize()
 
     def initialize(self):
@@ -34,26 +35,33 @@ class MazeDiffusion:
         Initialize simulation parameters
         """
         print("I: Initializing system...\r", end='', flush=True)
-        self.radius = sqrt(.3/self.n/pi)
+        if self.fan_speed:
+            self.radius = sqrt(.2/self.n/pi)
+        else:
+            self.radius = sqrt(.3/self.n/pi)
+        newlog = True
         if not self.pos:
             self.pos = initial_pos(self.n, self.radius)
             self.pos = [[p[0], p[1] + self.height] for p in self.pos]
         else:
             self.n = 0
             self.import_pos()
+            newlog = False
         if not self.vel:
             self.vel = initial_vel(self.n)
         else:
             self.n = 0
             self.import_vel()
+            newlog = False
         if not self.grid:
             self.grid = make_maze(self.width, self.height)
         else:
             self.import_grid()
-        if os.path.exists(self.logfile):
-            os.remove(self.logfile)
-        with open(self.logfile, 'w') as file:
-            file.write("Initialized system\n")
+        if newlog:
+            if os.path.exists(self.logfile):
+                os.remove(self.logfile)
+            with open(self.logfile, 'w') as file:
+                file.write("Initialized system\n")
         print("I: Initializing system...Done")
         return 0
 
@@ -72,6 +80,8 @@ class MazeDiffusion:
         else:
             self.pos = data
             self.n = x
+            if any(p[1]-self.radius < 0 for p in self.pos):
+                self.indicator = True
         print(f"I: Imported initial positions for {x} particles")
         return 0
 
@@ -81,7 +91,7 @@ class MazeDiffusion:
         """
         print("I: Importing initial velocities...\r", end='', flush=True)
         data, x = [], 0
-        with open(self.pos, 'r') as file:
+        with open(self.vel, 'r') as file:
             for line in file.readlines()[1:]:
                 data.append([float(x) for x in line.rstrip().split(' ')])
                 x += 1
@@ -115,23 +125,23 @@ class MazeDiffusion:
         """
         with open(self.logfile, 'r') as file:
             t, i, p, v = -1, 0, [], []
-            builder = Pool()
-            print("I: Creating simulation snapshots")
-            for line in file.readlines():
-                if line.startswith("time"):
-                    if t >= 0:
-                        builder.apply_async(save_snap,
-                                            args=(i, p, v,self.radius, self.grid,
-                                                  self.snapdir, self.with_arrows))
-                        t, i, p, v = 0, 0, [], []
-                    _, t, _, i = line.split(' ')
-                    t, i = float(t), int(i)
-                elif line.startswith("pos"):
-                    p.append([float(x) for x in line.rstrip().split(' ')[1:]])
-                elif line.startswith("vel"):
-                    v.append([float(x) for x in line.rstrip().split(' ')[1:]])
-            builder.close()
-            builder.join()
+            with Pool() as builder:
+                print("I: Creating simulation snapshots")
+                for line in file.readlines():
+                    if line.startswith("time"):
+                        if t >= 0:
+                            builder.apply_async(save_snap,
+                                                args=(i, p, v,self.radius, self.grid,
+                                                      self.snapdir, self.with_arrows))
+                            t, i, p, v = 0, 0, [], []
+                        _, t, _, i = line.split(' ')
+                        t, i = float(t), int(i)
+                    elif line.startswith("pos"):
+                        p.append([float(x) for x in line.rstrip().split(' ')[1:]])
+                    elif line.startswith("vel"):
+                        v.append([float(x) for x in line.rstrip().split(' ')[1:]])
+                builder.close()
+                builder.join()
             save_snap(i+1, p, v, self.radius, self.grid,
                       self.snapdir, self.with_arrows, e_x=max(x[1][0] for x in self.grid), e_y=0)
         print("I: Merging snapshots to create final video...\r", end='', flush=True)
@@ -146,9 +156,19 @@ class MazeDiffusion:
         if not self.radius:
             print("I: Please initialize the positions and velocities first.")
             return 0
-        time, i = run_simulation(self.n, self.pos, self.vel, self.radius, self.grid, int(num_steps),
-                                 self.dt, self.stepsize, self.snapdir, self.logfile)
+        if self.fan_speed:
+            time, pos, vel, n, i = simulation_with_fan(self.n, self.pos, self.vel, self.radius,
+                                                       self.grid, int(num_steps), self.fan_speed,
+                                                       self.height, self.dt, self.stepsize,
+                                                       self.snapdir, self.logfile)
+            self.n = n
+        else:
+            time, pos, vel, i = run_simulation(self.n, self.pos, self.vel, self.radius, self.grid,
+                                               int(num_steps), self.dt, self.stepsize, self.snapdir,
+                                               self.logfile)
         self.duration += time
+        self.pos = pos
+        self.vel = vel
         self.indicator = i
         return 0
 
@@ -170,6 +190,9 @@ class MazeDiffusion:
                 elif line.startswith("pos"):
                     tmp.append([float(x) for x in line.split(' ')[1:]])
             data.append(tmp)
+        if len(data) <= 1:
+            print("E: Simulation log seems to be missing; cannot create trace path")
+            return 1
         plot_trace_path(data, self.width, self.radius, self.grid, self.snapdir)
         print("I: Tracing the path of the exiting particle...Done")
         return 0
@@ -217,6 +240,5 @@ class MazeDiffusion:
             return "    Currently unitialized"
         print(f"    Contains {self.n} particles")
         print(f"    MD Simulation has been run for {self.duration:.5f} seconds")
-        avg_vel = sqrt((sum(v[0] for v in self.vel)/len(self.vel))**2 +
-                       (sum(v[1] for v in self.vel)/len(self.vel))**2)
+        avg_vel = sqrt((sum(sqrt(v[0]**2+v[1]**2) for v in self.vel)/len(self.vel))**2)
         return f"    RMS velocity of particles: {avg_vel}"

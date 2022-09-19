@@ -3,6 +3,8 @@ EdMD simulation
 """
 import os
 from math import sqrt
+from random import uniform
+from initialize import particle_shower
 
 
 def get_sg_pr(n):
@@ -61,6 +63,9 @@ def pair_time(x_a, v_a, x_b, v_b, r):
     """
     Time before two particles hit each other
     """
+    # to simplify code...hopefully
+    if abs(x_a[0]-x_b[0]) > 1 or abs(x_a[1]-x_b[1]) > 1:
+        return float("inf")
     (dx, dx_2), (dv, dv_2) = map(lambda a, b: ([b[0]-a[0], b[1]-a[1]],
                                                (b[0]-a[0])**2 + (b[1]-a[1])**2),
                                  (x_a, v_a), (x_b, v_b))
@@ -161,6 +166,45 @@ def pull_apart(pos, vel, r, singles, pairs, n_ix):
     return pos, vel
 
 
+def simulate_step(p, v, r, sg, pr, edges, t, next_e, next_e_i, dt=0):
+    """
+    Run one step of simulation
+    """
+    if dt:
+        next_t = t + dt
+    else:
+        next_t = t + next_e
+    q = 0
+    v_old = v
+    while t+next_e <= next_t:
+        if q > 100 and all(abs(v[k][l]) == abs(v_old[k][l]) for k, l in sg):
+
+            # clearly, we're just stuck here, doing nothing,
+            # so just skip to next event
+            step = max(dt, next_e)
+        else:
+
+            # but if not, iterate over the smallest timestep
+            step = min(dt, next_e)
+        q += 1
+        t += step
+        for k, l in sg:
+            p[k], v[k][l] = fix_delta(p[k], v[k], r, edges, l)
+            p[k][l] += v[k][l]*step
+        v = get_velocities(p, v, sg, pr, next_e_i)
+        next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
+        if next_e < 0 and next_e_i > len(sg):
+            p, v = pull_apart(p, v, r, sg, pr, next_e_i)
+        v_old = v
+    remain_t = next_t - t
+    for k, l in sg:
+        p[k], v[k][l] = fix_delta(p[k], v[k], r, edges, l)
+        p[k][l] += v[k][l]*remain_t
+    t += remain_t
+    next_e -= remain_t
+    return p, v, next_e, next_e_i, t
+
+
 def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
     """
     Run Molecular Dynamics simulation
@@ -180,39 +224,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
     save_log(logfile, t, i, p, v)
     i += 1
     for _ in range(n_events):
-        if dt:
-            next_t = t + dt
-        else:
-            next_t = t + next_e
-
-        q = 0
-        v_old = v
-        while t+next_e <= next_t:
-            if q > 100 and all(abs(v[k][l]) == abs(v_old[k][l]) for k, l in sg):
-
-                # clearly, we're just stuck here, doing nothing,
-                # so just skip to next event
-                step = max(dt, next_e)
-            else:
-
-                # but if not, iterate over the smallest timestep
-                step = min(dt, next_e)
-            q += 1
-            t += step
-            for k, l in sg:
-                p[k], v[k][l] = fix_delta(p[k], v[k], r, edges, l)
-                p[k][l] += v[k][l]*step
-            v = get_velocities(p, v, sg, pr, next_e_i)
-            next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
-            if next_e < 0 and next_e_i > len(sg):
-                p, v = pull_apart(p, v, r, sg, pr, next_e_i)
-            v_old = v
-        remain_t = next_t - t
-        for k, l in sg:
-            p[k], v[k][l] = fix_delta(p[k], v[k], r, edges, l)
-            p[k][l] += v[k][l]*remain_t
-        t += remain_t
-        next_e -= remain_t
+        p, v, next_e, next_e_i, t = simulate_step(p, v, r, sg, pr, edges, t, next_e, next_e_i, dt)
 
         if not i%stepsize:
             save_log(logfile, t, i//stepsize, p, v)
@@ -224,6 +236,51 @@ def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
         for pos in p:
             if max_x-2 < pos[0] < max_x+1 and pos[1]+r < 0:
                 print(f"\nI: Timestep {t:.5f}; a particle solved the maze! Halting")
-                return t, 1
+                return t, p, v, 1
     print(f"\nI: Finished simulation for {t} timesteps")
-    return t, 0
+    return t, p, v, 0
+
+
+def simulation_with_fan(n, p, v, r, edges, n_events, fan_speed, height, dt, stepsize, out, logfile):
+    """
+    Run Molecular Dynamics simulation with pressure gradient
+    """
+    # find the exit point
+    orig_n = n
+    max_x = max(x[1][0] for x in edges)
+
+    sg, pr = get_sg_pr(n)
+
+    if os.path.isdir(out):
+        print("I: Output directory already exists, deleting any files within it...")
+        for file in os.listdir(out):
+            os.remove(f"{out}/{file}")
+    t, i = 0, 0
+
+    next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
+    save_log(logfile, t, i, p, v)
+    i += 1
+    for _ in range(n_events):
+        p, v, next_e, next_e_i, t = simulate_step(p, v, r, sg, pr, edges, t, next_e, next_e_i, dt)
+
+        if not i%stepsize:
+            save_log(logfile, t, i//stepsize, p, v)
+
+            # add new particles to the mix
+            if uniform(0, 1) < fan_speed/5:
+                p, v = particle_shower(p, v, r, height, orig_n)
+                n = len(p)
+                sg, pr = get_sg_pr(n)
+                next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
+        i += 1
+        if not i%(stepsize//10):
+            print(f"\033[KI: Simulating timestep {t:.5f} s ({n} particles)\r", end='', flush=True)
+
+        # check if any particle has reached the exit
+        for pos in p:
+            if max_x-2 < pos[0] < max_x+1 and pos[1]+r < 0:
+                print(f"\nI: Timestep {t:.5f}; a particle solved the maze! Halting")
+                return t, p, v, n, 1
+
+    print(f"\nI: Finished simulation for {t} timesteps")
+    return t, p, v, n, 0
