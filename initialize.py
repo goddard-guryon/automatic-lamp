@@ -51,8 +51,8 @@ def particle_shower(pos, vel, r, e_p, orig_n):
     # num = int((1-len([x for x in pos if 1-3*r<(x[1]-int(x[1]))<1-r])*2*r/len(pos))*len(pos)/20)
 
     # particles will have only variance in the x-coordinate
-    new_pos, new_vel = [], []
-    prob = uniform(0, 1) < (orig_n/len(pos) - .5)*2
+    new_pos, new_vel, extras = [], [], len(pos)-orig_n
+    prob = uniform(0, 1) < (orig_n-extras)/(orig_n+extras)  # maffs
     to_push = [b for a, b in zip(pos, vel) if int(a[1]) == e_p]
     if not to_push:
         prob = 1
@@ -69,7 +69,7 @@ def particle_shower(pos, vel, r, e_p, orig_n):
     else:
 
         # we don't always add a particle; sometimes we simply push
-        # an existing particle
+        # an existing particle through an apparent force
         v = choice(to_push)
         vel[vel.index(v)][1] -= abs(uniform(0, 1))
     if new_pos:

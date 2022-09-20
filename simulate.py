@@ -267,13 +267,15 @@ def simulation_with_fan(n, p, v, r, edges, n_events, fan_speed, height, dt, step
             save_log(logfile, t, i//stepsize, p, v)
 
             # add new particles to the mix
-            if uniform(0, 1) < fan_speed/5:
+            if uniform(0, 1) < fan_speed/10:
                 p, v = particle_shower(p, v, r, height, orig_n)
                 n = len(p)
                 sg, pr = get_sg_pr(n)
                 next_e, next_e_i = get_next_event(p, v, sg, pr, r, edges)
         i += 1
-        if not i%(stepsize//10):
+
+        # //13 (or any other prime number, I guess) makes the output look more...busy :P
+        if not i%(stepsize//13):
             print(f"\033[KI: Simulating timestep {t:.5f} s ({n} particles)\r", end='', flush=True)
 
         # check if any particle has reached the exit

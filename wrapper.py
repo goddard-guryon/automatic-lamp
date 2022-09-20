@@ -28,6 +28,8 @@ class MazeDiffusion:
         self.vel = kwargs.get("velocities", None)
         self.grid = kwargs.get("maze", None)
         self.fan_speed = kwargs.get("pressure_factor", 0)
+        if self.fan_speed:
+            self.orig_n = n
         self.initialize()
 
     def initialize(self):
@@ -238,7 +240,13 @@ class MazeDiffusion:
         print(f"    Maze size: {self.height} x {self.width}")
         if not self.radius:
             return "    Currently unitialized"
-        print(f"    Contains {self.n} particles")
+        if self.fan_speed:
+            print(f"    Contains {self.n} particles (from {self.orig_n} input particles)")
+            factor = f"Yes (pressure factor: {self.fan_speed})"
+        else:
+            print(f"    Contains {self.n} particles")
+            factor = "No"
+        print(f"    Pressurized entry point: {factor}")
         print(f"    MD Simulation has been run for {self.duration:.5f} seconds")
         avg_vel = sqrt((sum(sqrt(v[0]**2+v[1]**2) for v in self.vel)/len(self.vel))**2)
         return f"    RMS velocity of particles: {avg_vel}"
