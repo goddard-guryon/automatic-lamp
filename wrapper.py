@@ -159,10 +159,10 @@ class MazeDiffusion:
             print("I: Please initialize the positions and velocities first.")
             return 0
         if self.fan_speed:
-            time, pos, vel, n, i = simulation_with_fan(self.n, self.pos, self.vel, self.radius,
-                                                       self.grid, int(num_steps), self.fan_speed,
-                                                       self.height, self.dt, self.stepsize,
-                                                       self.snapdir, self.logfile)
+            time, pos, vel, n, i = simulation_with_fan(self.n, self.orig_n, self.pos, self.vel,
+                                                       self.radius, self.grid, int(num_steps),
+                                                       self.fan_speed, self.height, self.dt,
+                                                       self.stepsize, self.snapdir, self.logfile)
             self.n = n
         else:
             time, pos, vel, i = run_simulation(self.n, self.pos, self.vel, self.radius, self.grid,

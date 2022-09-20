@@ -29,7 +29,7 @@ cli.add_argument("--stepsize",
                  help="Save plots every x iterations (default: 2000)")
 cli.add_argument("--pressure_factor",
                  default=0, type=int, choices=list(range(11)),
-                 help="Apply pressure from the entry point. Takes values between 0-5 (default: 0)")
+                 help="Apply pressure from the entry point. Takes values between 0-10 (default: 0)")
 cli.add_argument("--dt",
                  default=5e-5, type=float,
                  help="Size of one simulation step (default: 5e-5)")
