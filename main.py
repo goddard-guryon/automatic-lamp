@@ -42,6 +42,12 @@ cli.add_argument("--snapdir",
 cli.add_argument("--arrows",
                  default=False, type=bool,
                  help="Whether to draw velocity arrows in simulation snapshots (default: False)")
+cli.add_argument("--i_file",
+                 default=None, type=str,
+                 help="JSON file to import an existing object from (defult: None)")
+cli.add_argument("--o_file",
+                 default=None, type=str,
+                 help="JSON file to save the object in after every simulation (default: None)")
 cli.add_argument("--pos_i",
                  default=None, type=str,
                  help="Input file containing initial positions of particles (default: None)")
@@ -80,6 +86,8 @@ arg_dct = {"dt": args.dt,
            "snapdir": args.snapdir,
            "stepsize": args.stepsize,
            "with_arrows": args.arrows,
+           "from_file": args.i_file,
+           "to_file": args.o_file,
            "maze": args.maze_i,
            "positions": args.pos_i,
            "velocities": args.vel_i,

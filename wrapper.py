@@ -2,6 +2,7 @@
 Main class definition
 """
 import os
+import json
 from math import sqrt, pi
 from multiprocessing import Pool
 from maze import make_maze
@@ -11,26 +12,31 @@ from plot import save_snap, make_video, plot_trace_path
 
 
 class MazeDiffusion:
-    def __init__(self, n=10, rows=10, cols=10, **kwargs):
-        self.n = n
-        self.height = rows
-        self.width = cols
-        self.radius = 0
-        self.indicator = 0
-        self.pos, self.vel, self.grid = [], [], []
-        self.dt = kwargs.get("dt", 5e-5)
-        self.duration = kwargs.get("duration", 0)
-        self.stepsize = kwargs.get("stepsize", 2000)
-        self.with_arrows = kwargs.get("with_arrows", False)
-        self.logfile = kwargs.get("logfile", "simulation.log")
-        self.snapdir = kwargs.get("snapdir", "simulation_snapshots")
-        self.pos = kwargs.get("positions", None)
-        self.vel = kwargs.get("velocities", None)
-        self.grid = kwargs.get("maze", None)
-        self.fan_speed = kwargs.get("pressure_factor", 0)
+    def __init__(self, n=10, rows=10, cols=10, from_file=None, **kwargs):
+        self.n = 0
+        if from_file:
+            self.file_import(from_file)
+        if not self.n:
+            self.n = n
+            self.height = rows
+            self.width = cols
+            self.radius = 0
+            self.indicator = 0
+            self.pos, self.vel, self.grid = [], [], []
+            self.dt = kwargs.get("dt", 5e-5)
+            self.duration = kwargs.get("duration", 0)
+            self.stepsize = kwargs.get("stepsize", 2000)
+            self.with_arrows = kwargs.get("with_arrows", False)
+            self.logfile = kwargs.get("logfile", "simulation.log")
+            self.snapdir = kwargs.get("snapdir", "simulation_snapshots")
+            self.pos = kwargs.get("positions", None)
+            self.vel = kwargs.get("velocities", None)
+            self.grid = kwargs.get("maze", None)
+            self.fan_speed = kwargs.get("pressure_factor", 0)
+            self.export_file = kwargs.get("to_file", None)
+            self.initialize()
         if self.fan_speed:
             self.orig_n = n
-        self.initialize()
 
     def initialize(self):
         """
@@ -65,6 +71,37 @@ class MazeDiffusion:
             with open(self.logfile, 'w') as file:
                 file.write("Initialized system\n")
         print("I: Initializing system...Done")
+        return 0
+
+    def file_import(self, fname):
+        """
+        Import saved object instance
+        """
+        print("I: Importing object from file...\r", end='', flush=True)
+        if not fname.endswith(".json"):
+            print("E: Invalid import file, creating a new object instead")
+            return 0
+        with open(fname, 'r') as file:
+            data = json.load(file)
+            for prop, val in data.items():
+                self.__dict__[prop] = val
+        print("I: Importing object from file...Done")
+        return 0
+
+    def file_export(self, fname):
+        """
+        Export object instance to file
+        """
+        print("I: Exporting object instance to file...\r", end='', flush=True)
+        if not fname.endswith(".json"):
+            print(f"W: Export filename is invalid, saving in file {fname}.json instead")
+            fname += ".json"
+        if os.path.exists(fname):
+            print("W: Exporting object instance to file...     (overwriting existing file)\r",
+                  end='', flush=True)
+        with open(fname, 'w') as file:
+            json.dump(self.__dict__, file)
+        print("I: Exporting object instance to file...Done")
         return 0
 
     def import_pos(self):
@@ -172,6 +209,8 @@ class MazeDiffusion:
         self.pos = pos
         self.vel = vel
         self.indicator = i
+        if self.export_file:
+            self.file_export(self.export_file)
         return 0
 
     def trace_path(self):
