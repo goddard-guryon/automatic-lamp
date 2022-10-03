@@ -4,7 +4,9 @@ EdMD simulation
 import os
 from math import sqrt, cos, atan
 from random import uniform
-from initialize import particle_shower
+from initialize import initialize
+
+particle_shower = initialize.particle_shower
 
 
 def get_bx_pr(n: int) -> tuple:
@@ -248,7 +250,7 @@ def run_simulation(n, p, v, r, edges, n_events, dt, stepsize, out, logfile):
     return t, p, v, 0
 
 
-def simulation_with_fan(n, orig_n, p, v, r, edges, n_events, fan_speed, height, dt, stepsize, out, logfile):
+def simulation_with_fan(n, orig_n, p, v, r, t, edges, n_events, fan_speed, height, dt, stepsize, out, logfile):
     """
     Run Molecular Dynamics simulation with pressure gradient
     """
@@ -274,7 +276,11 @@ def simulation_with_fan(n, orig_n, p, v, r, edges, n_events, fan_speed, height, 
 
             # add new particles to the mix
             if uniform(0, 1) < fan_speed/10:
-                p, v = particle_shower(p, v, r, height, orig_n)
+                p_a, v_a = particle_shower([p, v], r, t, height, orig_n)
+                if p_a[-1][0] != 0:
+                    p, v = p_a, v_a
+                else:
+                    p, v = p_a[:-1], v_a[:-1]
                 n = len(p)
                 bx, pr = get_bx_pr(n)
                 next_e, next_e_i = get_next_event(p, v, bx, pr, r, edges)

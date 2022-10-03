@@ -6,9 +6,14 @@ import json
 from math import sqrt, pi
 from multiprocessing import Pool
 from maze import make_maze
-from initialize import initial_pos, initial_vel
+import numpy as np
+from initialize import initialize
 from simulate import run_simulation, simulation_with_fan
 from plot import save_snap, make_video, plot_trace_path
+
+initial_pos = initialize.initial_pos
+initial_vel = initialize.initial_vel
+particle_shower = initialize.particle_shower
 
 
 class MazeDiffusion:
@@ -32,6 +37,7 @@ class MazeDiffusion:
             self.pos = kwargs.get("positions", None)
             self.vel = kwargs.get("velocities", None)
             self.grid = kwargs.get("maze", None)
+            self.temp = kwargs.get("temperature", 1)
             self.fan_speed = kwargs.get("pressure_factor", 0)
             self.export_file = kwargs.get("to_file", None)
             self.initialize()
@@ -56,7 +62,7 @@ class MazeDiffusion:
             self.import_pos()
             newlog = False
         if not self.vel:
-            self.vel = initial_vel(self.n)
+            self.vel = initial_vel(self.n, self.temp)
         else:
             self.n = 0
             self.import_vel()
@@ -197,7 +203,7 @@ class MazeDiffusion:
             return 0
         if self.fan_speed:
             time, pos, vel, n, i = simulation_with_fan(self.n, self.orig_n, self.pos, self.vel,
-                                                       self.radius, self.grid, int(num_steps),
+                                                       self.radius, self.temp, self.grid, int(num_steps),
                                                        self.fan_speed, self.height, self.dt,
                                                        self.stepsize, self.snapdir, self.logfile)
             self.n = n

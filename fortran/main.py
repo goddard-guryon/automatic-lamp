@@ -27,7 +27,10 @@ cli.add_argument("--duration",
 cli.add_argument("--stepsize",
                  default=2000, type=int,
                  help="Save plots every x iterations (default: 2000)")
-cli.add_argument("--pressure_factor",
+cli.add_argument("--t_factor",
+                 default=1, type=int, choices=list(range(11)),
+                 help="Temperature factor for particle velocity. Takes values between 0-10 (default: 1)")
+cli.add_argument("--p_factor",
                  default=0, type=int, choices=list(range(11)),
                  help="Apply pressure from the entry point. Takes values between 0-10 (default: 0)")
 cli.add_argument("--dt",
@@ -91,7 +94,8 @@ arg_dct = {"dt": args.dt,
            "maze": args.maze_i,
            "positions": args.pos_i,
            "velocities": args.vel_i,
-           "pressure_factor": args.pressure_factor}
+           "temp": args.t_factor,
+           "pressure_factor": args.p_factor}
 instance = MazeDiffusion(args.num, args.height, args.width, **arg_dct)
 if not args.no_sim:
     instance.simulate(args.duration)
