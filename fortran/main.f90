@@ -2,9 +2,11 @@ program main
     use, intrinsic :: iso_fortran_env, only : int16, int32, real32
     use :: maze
     implicit none
-    integer :: m = 5, n = 6
-    type(node_t), allocatable :: tree(:)
-    allocate(tree(m*n))
-    tree = make_maze(m, n)
-    print *, 8/5+1
+    integer :: edges(120, 2, 2), i
+    edges = make_maze(5, 6)
+    do i = 1, size(edges, 1)
+        if (.not. any(edges(i, :, :) == 0)) then
+            call f_print(edges(i, :, :))
+        end if
+    end do
 end program main

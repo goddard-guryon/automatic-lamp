@@ -12,6 +12,7 @@ add_compile_options(-Wall -Wextra)
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
+    set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR})
     set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in)
     set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
@@ -27,4 +28,4 @@ else (DOXYGEN_FOUND)
     message("Failed to find Doxygen, skipping documentation build")
 endif (DOXYGEN_FOUND)
 
-add_executable(test.f90.out test.f90 window_stats.f90)
+add_executable(test main.f90 maze.f90)

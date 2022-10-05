@@ -1,0 +1,1 @@
+/usr/bin/f95 CMakeFiles/test.dir/main.f90.o CMakeFiles/test.dir/maze.f90.o -o test 

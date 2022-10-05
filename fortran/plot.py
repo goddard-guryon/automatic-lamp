@@ -19,32 +19,26 @@ except ModuleNotFoundError:
     FALLBACK = True
 
 
-def save_snap(i, p, v, r, edges, output_dir, with_arrows, arrow_scale=.2, e_x=0, e_y=0):
+def save_snap(edges):
     """
     Save a snapshot of simulation
     """
-    lim_x, lim_y = max(x[0][0] for x in edges), max(x[0][1] for x in edges)
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
     plt.clf()
-    plt.xticks([])
-    plt.yticks([])
-    plt.xlim(-.5, lim_x+.5)
-    plt.ylim(-.5, lim_y+.5)
     for e in edges:
         plt.plot([e[0][0], e[1][0]], [e[0][1], e[1][1]], "b-")
-    for (x, y), (dx, dy) in zip(p, v):
-        dx *= arrow_scale
-        dy *= arrow_scale
-        col = 'b'
-        if e_x-2 < x < e_x+1 and y-r < e_y:
-            col = 'r'
-        circle = plt.Circle((x, y), radius=r, fc=col)
-        plt.gca().add_patch(circle)
-        if with_arrows:
-            plt.arrow(x, y, dx, dy, fc='k', ec='k', head_length=.05, head_width=.05)
-    plt.savefig(os.path.join(output_dir, f"{i}.png"))
+    plt.show()
     return 0
+
+edges = []
+n = 6
+with open("edges.txt", 'r') as file:
+    edge, tmp = [], []
+    for line in file.readlines():
+        fw = line.rstrip()[2:-2].split(') => (')
+        fw = [tuple(int(y) for y in x.split(',')) for x in fw]
+        edges.append(fw)
+print(edges)
+save_snap(edges)
 
 
 def plot_trace_path(pos, w, r, edges, output_dir):

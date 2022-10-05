@@ -1,0 +1,57 @@
+\hypertarget{namespaceinitialize}{}\doxysection{initialize Namespace Reference}
+\label{namespaceinitialize}\index{initialize@{initialize}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespaceinitialize_a3cce4142de046d0979b119a1848c7d25}{initial\+\_\+pos}} (n, r)
+\item 
+def \mbox{\hyperlink{namespaceinitialize_ad14f323def018554c46d67da34a14328}{initial\+\_\+vel}} (n)
+\item 
+def \mbox{\hyperlink{namespaceinitialize_a61db89c674106f1ce16f234896a0d1e9}{particle\+\_\+shower}} (pos, vel, r, e\+\_\+p, orig\+\_\+n)
+\item 
+\mbox{\Hypertarget{namespaceinitialize_a391d4142e290bb8ef439dc5a6e2b3248}\label{namespaceinitialize_a391d4142e290bb8ef439dc5a6e2b3248}} 
+subroutine, public {\bfseries get\+\_\+displacement} (old, new, dist)
+\item 
+\mbox{\Hypertarget{namespaceinitialize_aa5285645a09ade2be02c986386f05e12}\label{namespaceinitialize_aa5285645a09ade2be02c986386f05e12}} 
+real(kind=r8) function, dimension(n, 2), public {\bfseries initial\+\_\+pos} (n, r)
+\item 
+\mbox{\Hypertarget{namespaceinitialize_ac7caaecc66acc84afddc76fbd8673b89}\label{namespaceinitialize_ac7caaecc66acc84afddc76fbd8673b89}} 
+real(kind=r8) function, dimension(n, 2), public {\bfseries initial\+\_\+vel} (n, t)
+\item 
+\mbox{\Hypertarget{namespaceinitialize_a70225feffa45de59f09e43133b2435b9}\label{namespaceinitialize_a70225feffa45de59f09e43133b2435b9}} 
+real(kind=r8) function, dimension(2, n+1, 2), public {\bfseries particle\+\_\+shower} (dat, n, r, t, e\+\_\+p, orig\+\_\+n)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Initialize positions and velocities
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceinitialize_a3cce4142de046d0979b119a1848c7d25}\label{namespaceinitialize_a3cce4142de046d0979b119a1848c7d25}} 
+\index{initialize@{initialize}!initial\_pos@{initial\_pos}}
+\index{initial\_pos@{initial\_pos}!initialize@{initialize}}
+\doxysubsubsection{\texorpdfstring{initial\_pos()}{initial\_pos()}}
+{\footnotesize\ttfamily def initialize.\+initial\+\_\+pos (\begin{DoxyParamCaption}\item[{}]{n,  }\item[{}]{r }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Initialize positions of disk in 1x1 box
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceinitialize_ad14f323def018554c46d67da34a14328}\label{namespaceinitialize_ad14f323def018554c46d67da34a14328}} 
+\index{initialize@{initialize}!initial\_vel@{initial\_vel}}
+\index{initial\_vel@{initial\_vel}!initialize@{initialize}}
+\doxysubsubsection{\texorpdfstring{initial\_vel()}{initial\_vel()}}
+{\footnotesize\ttfamily def initialize.\+initial\+\_\+vel (\begin{DoxyParamCaption}\item[{}]{n }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Initialize velocities of disks using
+Maxwell-Boltzmann distribution
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceinitialize_a61db89c674106f1ce16f234896a0d1e9}\label{namespaceinitialize_a61db89c674106f1ce16f234896a0d1e9}} 
+\index{initialize@{initialize}!particle\_shower@{particle\_shower}}
+\index{particle\_shower@{particle\_shower}!initialize@{initialize}}
+\doxysubsubsection{\texorpdfstring{particle\_shower()}{particle\_shower()}}
+{\footnotesize\ttfamily def initialize.\+particle\+\_\+shower (\begin{DoxyParamCaption}\item[{}]{pos,  }\item[{}]{vel,  }\item[{}]{r,  }\item[{}]{e\+\_\+p,  }\item[{}]{orig\+\_\+n }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Add particles with force into the system
+\end{DoxyVerb}
+ 

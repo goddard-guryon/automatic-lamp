@@ -1,0 +1,4 @@
+/home/goddard/git_repos/automatic-lamp/fortran/build/CMakeFiles/doc_doxygen.dir
+/home/goddard/git_repos/automatic-lamp/fortran/build/CMakeFiles/test.dir
+/home/goddard/git_repos/automatic-lamp/fortran/build/CMakeFiles/edit_cache.dir
+/home/goddard/git_repos/automatic-lamp/fortran/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,13 @@
+/*!
+    @mainpage
+    @brief Molecular Dynamics simulation of gas diffusion in a 2D maze
+    @author Goddard Guryon
+
+    This is a Python-Fortran project that runs an MD simulation of diffusion of particles in
+    a 2D rectangular maze grid. The simulation can be run using the command:
+    ~~~~~~~~~~
+    $ python main.py
+    ~~~~~~~~~~
+
+    For more information, check https://github.com/goddard-guryon/automatic-lamp
+*/

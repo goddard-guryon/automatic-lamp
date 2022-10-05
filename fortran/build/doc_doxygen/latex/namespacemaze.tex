@@ -1,0 +1,198 @@
+\hypertarget{namespacemaze}{}\doxysection{maze Module Reference}
+\label{namespacemaze}\index{maze@{maze}}
+
+
+Maze generation for simulation This module contains functions for creating a maze object. The maze path is generated as a tree, and the function returns a list of edges between the nodes of the grid.  
+
+
+\doxysubsection*{Data Types}
+\begin{DoxyCompactItemize}
+\item 
+type \mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions/\+Subroutines}
+\begin{DoxyCompactItemize}
+\item 
+integer function, dimension(4) \mbox{\hyperlink{namespacemaze_a0d56d529c655264bd97271d6c170af53}{get\+\_\+nbrs}} (k, m, n)
+\begin{DoxyCompactList}\small\item\em get neighboring boxes in the grid Given a box (=node) location, find its neighboring boxes in the grid. \end{DoxyCompactList}\item 
+type(\mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}}) function, target \mbox{\hyperlink{namespacemaze_a936993794f02176a8e7333d1e689f96b}{add\+\_\+child}} (tree, parent, nbr\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Add a child node Small function to connect two nodes to each other and create a node if only one of the two exists. \end{DoxyCompactList}\item 
+type(\mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}}) function, dimension(m $\ast$n) \mbox{\hyperlink{namespacemaze_a624079d51e132752c6264c76c6c13305}{maze\+\_\+grid}} (m, n)
+\begin{DoxyCompactList}\small\item\em Generation of maze path as a tree This generates the tree object as an array of nodes which corresponds to a path through the maze. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemaze_a20a2a1b2d83035f2cf088c0f02226898}{f\+\_\+print}} (e, extra)
+\begin{DoxyCompactList}\small\item\em Print the list of edges Simply call this subroutine to print an edge array in a formatted manner. To print the whole edges object, iterate over the object and call this subroutine on each item in it. \end{DoxyCompactList}\item 
+integer function, dimension(2, 2) \mbox{\hyperlink{namespacemaze_a766b7749a48a33fb87db954523a3658a}{get\+\_\+edge}} (x, y, m, n)
+\begin{DoxyCompactList}\small\item\em get the edge coordinates, given a box in grid Given the x and y parameters of the box, return the corresponding wall in the maze, represented as a list of edges. The return object is represented as a 3D array such that\+: \mbox{[}\mbox{[}(x, y of node 1), (x, y of node 2)\mbox{]}, \mbox{[}(x, y of node 2), (x, y of node 1)\mbox{]} (both orders are listed to prevent any orientation mismatch, also see f\+\_\+print). \end{DoxyCompactList}\item 
+integer function, dimension(\+:, \+:, \+:), allocatable \mbox{\hyperlink{namespacemaze_a3981e56cb4674027a49089997a2f9467}{make\+\_\+maze}} (m, n)
+\begin{DoxyCompactList}\small\item\em Main function for maze generation This function generates the maze edges, taking the tree structure from maze\+\_\+grid function and converting it into a list of edges which corresponds to the maze. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{namespacemaze_a66cfc02b39ec9f167d027455418bca5c}{fix\+\_\+path}} (n, is\+\_\+in\+\_\+path, conns)
+\item 
+def \mbox{\hyperlink{namespacemaze_a2f8127cff81e74e79de91d8e30e70969}{create\+\_\+path}} (m, n)
+\item 
+def \mbox{\hyperlink{namespacemaze_a46e6c184157dba0a15177eb02a46c883}{maze\+\_\+grid}} (m, n)
+\item 
+def \mbox{\hyperlink{namespacemaze_ac9b9f0b437a00660e8a379d160a4a0d5}{make\+\_\+maze}} (m, n=0)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Maze generation for simulation This module contains functions for creating a maze object. The maze path is generated as a tree, and the function returns a list of edges between the nodes of the grid. 
+
+\begin{DoxyVerb}Create a 2D maze
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function/\+Subroutine Documentation}
+\mbox{\Hypertarget{namespacemaze_a936993794f02176a8e7333d1e689f96b}\label{namespacemaze_a936993794f02176a8e7333d1e689f96b}} 
+\index{maze@{maze}!add\_child@{add\_child}}
+\index{add\_child@{add\_child}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{add\_child()}{add\_child()}}
+{\footnotesize\ttfamily type(\mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}}) function, target maze\+::add\+\_\+child (\begin{DoxyParamCaption}\item[{type(\mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}}), dimension(\+:), intent(inout), target}]{tree,  }\item[{type(\mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}}), intent(inout), target}]{parent,  }\item[{integer, intent(in)}]{nbr\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Add a child node Small function to connect two nodes to each other and create a node if only one of the two exists. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em tree} & The array of nodes already created \\
+\hline
+{\em parent} & ID of the extending node \\
+\hline
+{\em nbr\+\_\+id} & ID of the node being connected to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+child The newly connected node 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespacemaze_a2f8127cff81e74e79de91d8e30e70969}\label{namespacemaze_a2f8127cff81e74e79de91d8e30e70969}} 
+\index{maze@{maze}!create\_path@{create\_path}}
+\index{create\_path@{create\_path}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{create\_path()}{create\_path()}}
+{\footnotesize\ttfamily def maze.\+create\+\_\+path (\begin{DoxyParamCaption}\item[{}]{m,  }\item[{}]{n }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create a path through a grid
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacemaze_a20a2a1b2d83035f2cf088c0f02226898}\label{namespacemaze_a20a2a1b2d83035f2cf088c0f02226898}} 
+\index{maze@{maze}!f\_print@{f\_print}}
+\index{f\_print@{f\_print}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{f\_print()}{f\_print()}}
+{\footnotesize\ttfamily subroutine maze\+::f\+\_\+print (\begin{DoxyParamCaption}\item[{integer, dimension(2, 2), intent(in)}]{e,  }\item[{character(len=$\ast$), intent(in), optional}]{extra }\end{DoxyParamCaption})}
+
+
+
+Print the list of edges Simply call this subroutine to print an edge array in a formatted manner. To print the whole edges object, iterate over the object and call this subroutine on each item in it. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em e} & Edge array (2x2x2 array) \\
+\hline
+{\em extra} & Extra (optional) string to print after edge \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemaze_a66cfc02b39ec9f167d027455418bca5c}\label{namespacemaze_a66cfc02b39ec9f167d027455418bca5c}} 
+\index{maze@{maze}!fix\_path@{fix\_path}}
+\index{fix\_path@{fix\_path}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{fix\_path()}{fix\_path()}}
+{\footnotesize\ttfamily def maze.\+fix\+\_\+path (\begin{DoxyParamCaption}\item[{}]{n,  }\item[{}]{is\+\_\+in\+\_\+path,  }\item[{}]{conns }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Fix path on grid to add any missing nodes
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacemaze_a766b7749a48a33fb87db954523a3658a}\label{namespacemaze_a766b7749a48a33fb87db954523a3658a}} 
+\index{maze@{maze}!get\_edge@{get\_edge}}
+\index{get\_edge@{get\_edge}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{get\_edge()}{get\_edge()}}
+{\footnotesize\ttfamily integer function, dimension(2, 2) maze\+::get\+\_\+edge (\begin{DoxyParamCaption}\item[{integer, intent(in)}]{x,  }\item[{integer, intent(in)}]{y,  }\item[{integer, intent(in)}]{m,  }\item[{integer, intent(in)}]{n }\end{DoxyParamCaption})}
+
+
+
+get the edge coordinates, given a box in grid Given the x and y parameters of the box, return the corresponding wall in the maze, represented as a list of edges. The return object is represented as a 3D array such that\+: \mbox{[}\mbox{[}(x, y of node 1), (x, y of node 2)\mbox{]}, \mbox{[}(x, y of node 2), (x, y of node 1)\mbox{]} (both orders are listed to prevent any orientation mismatch, also see f\+\_\+print). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & The box being considered \\
+\hline
+{\em y} & The neighboring box \\
+\hline
+{\em n} & The width of the maze \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding wall in the maze, represented as a 3D array 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespacemaze_a0d56d529c655264bd97271d6c170af53}\label{namespacemaze_a0d56d529c655264bd97271d6c170af53}} 
+\index{maze@{maze}!get\_nbrs@{get\_nbrs}}
+\index{get\_nbrs@{get\_nbrs}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{get\_nbrs()}{get\_nbrs()}}
+{\footnotesize\ttfamily integer function, dimension(4) maze\+::get\+\_\+nbrs (\begin{DoxyParamCaption}\item[{integer, intent(in)}]{k,  }\item[{integer, intent(in)}]{m,  }\item[{integer, intent(in)}]{n }\end{DoxyParamCaption})}
+
+
+
+get neighboring boxes in the grid Given a box (=node) location, find its neighboring boxes in the grid. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Location of node (int from 1 to m$\ast$n) \\
+\hline
+{\em m} & number of rows in grid \\
+\hline
+{\em n} & number of columns in grid \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemaze_a3981e56cb4674027a49089997a2f9467}\label{namespacemaze_a3981e56cb4674027a49089997a2f9467}} 
+\index{maze@{maze}!make\_maze@{make\_maze}}
+\index{make\_maze@{make\_maze}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{make\_maze()}{make\_maze()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily integer function, dimension(\+:, \+:, \+:), allocatable maze\+::make\+\_\+maze (\begin{DoxyParamCaption}\item[{integer, intent(in)}]{m,  }\item[{integer, intent(in)}]{n }\end{DoxyParamCaption})}
+
+
+
+Main function for maze generation This function generates the maze edges, taking the tree structure from maze\+\_\+grid function and converting it into a list of edges which corresponds to the maze. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em m} & Height of maze \\
+\hline
+{\em n} & Width of maze \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+edges List of edges in 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespacemaze_ac9b9f0b437a00660e8a379d160a4a0d5}\label{namespacemaze_ac9b9f0b437a00660e8a379d160a4a0d5}} 
+\index{maze@{maze}!make\_maze@{make\_maze}}
+\index{make\_maze@{make\_maze}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{make\_maze()}{make\_maze()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily def maze.\+make\+\_\+maze (\begin{DoxyParamCaption}\item[{}]{m,  }\item[{}]{n = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Main function to make 2D maze
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacemaze_a624079d51e132752c6264c76c6c13305}\label{namespacemaze_a624079d51e132752c6264c76c6c13305}} 
+\index{maze@{maze}!maze\_grid@{maze\_grid}}
+\index{maze\_grid@{maze\_grid}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{maze\_grid()}{maze\_grid()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily type(\mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}}) function, dimension(m$\ast$n) maze\+::maze\+\_\+grid (\begin{DoxyParamCaption}\item[{integer, intent(in)}]{m,  }\item[{integer, intent(in)}]{n }\end{DoxyParamCaption})}
+
+
+
+Generation of maze path as a tree This generates the tree object as an array of nodes which corresponds to a path through the maze. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em m} & The number of rows (height) of maze \\
+\hline
+{\em n} & The number of columns (width) of maze \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+tree Array of \mbox{\hyperlink{structmaze_1_1node__t}{node\+\_\+t}} objects 
+\end{DoxyReturn}
+\mbox{\Hypertarget{namespacemaze_a46e6c184157dba0a15177eb02a46c883}\label{namespacemaze_a46e6c184157dba0a15177eb02a46c883}} 
+\index{maze@{maze}!maze\_grid@{maze\_grid}}
+\index{maze\_grid@{maze\_grid}!maze@{maze}}
+\doxysubsubsection{\texorpdfstring{maze\_grid()}{maze\_grid()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily def maze.\+maze\+\_\+grid (\begin{DoxyParamCaption}\item[{}]{m,  }\item[{}]{n }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create 2D grid
+\end{DoxyVerb}
+ 

@@ -1,30 +1,17 @@
 !> @brief Maze generation for simulation
-!> This module contains functions for creating a maze object
+!> This module contains functions for creating a maze object.
 !> The maze path is generated as a tree, and the function
-!> returns a list of edges between the nodes of the grid
-program maze
+!> returns a list of edges between the nodes of the grid.
+module maze
     implicit none
-    integer :: i
-    !private
     type node_t
-        integer :: id, n_nbrs = 0
-        integer :: nbr_0 = 0, nbr_1 = 0, nbr_2 = 0, nbr_3 = 0
+        integer :: id, n_nbrs = 0, nbr_0 = 0, nbr_1 = 0, nbr_2 = 0, nbr_3 = 0
     end type node_t
-    !public :: node_t, make_maze
-    type(node_t) :: tree(5*6)
-    !tree = make_maze(5, 6)
-    !do i = 1, size(tree)
-    !    associate (t => tree(i))
-    !        print '(I0, A, I0, A, I0, A, I0, A, I0, A, I0, A)', t%id, '(', t%n_nbrs, ') => (', &
-    !            t%nbr_0, ', ', t%nbr_1, ', ', t%nbr_2, ', ', t%nbr_3, ')'
-    !    end associate
-    !end do
-    !print *, "Done"
 contains
 
     !> @brief get neighboring boxes in the grid
     !> Given a box (=node) location, find its neighboring
-    !> boxes in the grid
+    !> boxes in the grid.
     !> @param k Location of node (int from 1 to m*n)
     !> @param m number of rows in grid
     !> @param n number of columns in grid
@@ -51,7 +38,7 @@ contains
             i = i + 1
         end if
 
-        if (mod(k, m) /= 0) then
+        if (k+n < m*n .and. mod(k, m) /= 0) then
             nbrs(i) = k + n
             i = i + 1
         end if
@@ -59,7 +46,7 @@ contains
 
     !> @brief Add a child node
     !> Small function to connect two nodes to each other
-    !> and create a node if only one of the two exists
+    !> and create a node if only one of the two exists.
     !> @param tree The array of nodes already created
     !> @param parent ID of the extending node
     !> @param nbr_id ID of the node being connected to
@@ -98,7 +85,7 @@ contains
 
     !> @brief Generation of maze path as a tree
     !> This generates the tree object as an array of nodes
-    !> which corresponds to a path through the maze
+    !> which corresponds to a path through the maze.
     !> @param m The number of rows (height) of maze
     !> @param n The number of columns (width) of maze
     !> @return tree Array of node_t objects
@@ -110,14 +97,20 @@ contains
         type(node_t), target :: new_node
         real :: rnd
 
-        ! start with a root node
-        new_node = node_t(id=1, n_nbrs=1)
-        new_node%nbr_0 = 1
-        tree(1) = new_node
-        current(1) = 1
-
-        ! now propagate
+        ! safety loop
         guard: do while (.true.)
+
+            !reinitialize
+            current = 0
+            do i = 1, size(tree)
+                tree(i) = node_t(id=0, n_nbrs=0, nbr_0=0, nbr_1=0, nbr_2=0, nbr_3=0)
+            end do
+
+            ! start with a root node
+            new_node = node_t(id=1, n_nbrs=1)
+            new_node%nbr_0 = 1
+            tree(1) = new_node
+            current(1) = 1
 
             ! check if we're done
             check = 0
@@ -139,15 +132,19 @@ contains
 
                             ! only connect if target node isn't already connected
                             ! lest there shall be no borders in the world
-                            if (nbrs(j) /= 0 .and. tree(nbrs(j))%n_nbrs == 0) then
-                                new_node = add_child(tree, tree(i), nbrs(j))
-                                tree(nbrs(j)) = new_node
-                                tree(i)%n_nbrs = tree(i)%n_nbrs + 1
-                                current(nbrs(j)) = 1
-                                current(i) = 0
-                                call random_number(rnd)
-                                if (rnd > 0.5) then
-                                    exit more
+                            if (nbrs(j) /= 0) then
+
+                                ! for some reason, I can't even use .and. here :)
+                                if (tree(nbrs(j))%n_nbrs <= 4) then
+                                    new_node = add_child(tree, tree(i), nbrs(j))
+                                    tree(nbrs(j)) = new_node
+                                    tree(i)%n_nbrs = tree(i)%n_nbrs + 1
+                                    current(nbrs(j)) = 1
+                                    current(i) = 0
+                                    call random_number(rnd)
+                                    if (rnd > 0.5) then
+                                        exit more
+                                    end if
                                 end if
                             end if
                         end do more
@@ -166,19 +163,80 @@ contains
         end do guard
     end function maze_grid
 
-    function get_edge(x, y, n) result(e)
+    !> @brief Print the list of edges
+    !> Simply call this subroutine to print an edge array in a
+    !> formatted manner. To print the whole edges object, iterate
+    !> over the object and call this subroutine on each item in it.
+    !> @param e Edge array (2x2x2 array)
+    !> @param extra Extra (optional) string to print after edge
+    subroutine f_print(e, extra)
+        use, intrinsic :: iso_fortran_env, only : output_unit
         implicit none
-        integer, intent(in) :: x, y, n
-        integer :: e(2, 2, 2)
-        if (y == x-1) then
-            e = [[[x-1, y-1], [x-1, y]], [[x-1, y], [x-1, y-1]]]
+        integer, intent(in) :: e(2, 2)
+        character(len=*), intent(in), optional :: extra
+        character(len=16) :: fmt_str
+
+        if (.not. present(extra)) then
+            fmt_str = '(8(A, I0), A)'
+            write(unit=output_unit, fmt=fmt_str) '[(', e(1,1), ',', e(1,2), ') => (', e(2,1), ',', &
+                e(2,2), ')]'
+        else
+            fmt_str = '(8(A, I0), A, A)'
+            write(unit=output_unit, fmt=fmt_str) '[(', e(1,1), ',', e(1,2), ') => (', e(2,1), ',', &
+                e(2,2), ')]'
+        end if
+    end subroutine
+
+    !> @brief get the edge coordinates, given a box in grid
+    !> Given the x and y parameters of the box, return the
+    !> corresponding wall in the maze, represented as a list of edges.
+    !> The return object is represented as a 3D array such that:
+    !> [[(x, y of node 1), (x, y of node 2)], [(x, y of node 2), (x, y of node 1)]
+    !> (both orders are listed to prevent any orientation mismatch, also see f_print).
+    !> @param x The box being considered
+    !> @param y The neighboring box
+    !> @param n The width of the maze
+    !> @return Corresponding wall in the maze, represented as a 3D array
+    function get_edge(x, y, m, n) result(e)
+        implicit none
+        integer, intent(in) :: x, y, m, n
+        integer :: i, j
+        integer :: e(2, 2)
+
+        i = x/n + 1
+        j = mod(x, n)
+        if (j == 0) j = n
+        !i = x
+        !j = y
+
+        ! idk why but I can't assign it all in one line /)-_-)
+        if (y == x-n) then  ! bottom wall: bottom-left to bottom-right
+            e(1, 1) = i-1
+            e(1, 2) = j-1 
+            e(2, 1) = i-1
+            e(2, 2) = j
+        else if (y == x+n) then  ! top wall: top-left to top-right
+            e(1, 1) = i-1
+            e(1, 2) = j
+            e(2, 1) = i
+            e(2, 2) = j
+        else if (y == x-1) then  ! left wall: bottom-left to top-left
+            e(1, 1) = i-1
+            e(1, 2) = j-1
+            e(2, 1) = i-1
+            e(2, 2) = j
+        else if (y == x+1) then  ! right wall: bottom-right to top-right
+            e(1, 1) = i
+            e(1, 2) = j-1
+            e(2, 1) = i
+            e(2, 2) = j
         end if
     end function get_edge
 
     !> @brief Main function for maze generation
     !> This function generates the maze edges, taking the tree
     !> structure from maze_grid function and converting it into
-    !> a list of edges which corresponds to the maze
+    !> a list of edges which corresponds to the maze.
     !> @param m Height of maze
     !> @param n Width of maze
     !> @return edges List of edges in 
@@ -186,12 +244,43 @@ contains
         implicit none
         integer, intent(in) :: m, n
         type(node_t) :: tree(m*n)
-        integer :: a, i, j, k = 0, buf(4*m*n, 2, 2), edge(2, 2)
+        integer :: a, i, j, k = 0, l, buf(8*m*n, 2, 2), edge(2, 2), tmp(2)
         integer, allocatable :: edges(:, :, :)
 
         tree = maze_grid(m, n)
         k = 1
         do a = 1, size(tree)
+            i = tree(a)%id
+
+            ! if only Fortran had f-strings
+            do l = 1, 3
+                select case(l)
+                    case (1)
+                        j = tree(a)%nbr_1
+                    case (2)
+                        j = tree(a)%nbr_2
+                    case (3)
+                        j = tree(a)%nbr_3
+                end select
+                if (j /= 0) then
+                    edge = get_edge(i, j, m, n)
+                    if (.not. any(edge < 0)) then
+                        buf(k, :, :) = edge(:, :)
+                        tmp = edge(1, :)
+                        edge(1, :) = edge(2, :)
+                        edge(2, :) = tmp
+                        buf(k+1, :, :) = edge(:, :)
+                        k = k + 2
+                    end if
+                end if
+            end do
+        end do
+
+        ! now create a new array of this size
+        allocate(edges(k, 2, 2))
+        do i = 1, k
+            edges(i, :, :) = buf(i, :, :)
+            call f_print(buf(i, :, :))
         end do
     end function make_maze
-end program maze
+end module maze

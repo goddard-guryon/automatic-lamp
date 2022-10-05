@@ -1,0 +1,134 @@
+\hypertarget{namespacesimulate}{}\doxysection{simulate Namespace Reference}
+\label{namespacesimulate}\index{simulate@{simulate}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+tuple \mbox{\hyperlink{namespacesimulate_a0ee677cd8c02c2f95ddf89929f5aa834}{get\+\_\+bx\+\_\+pr}} (int n)
+\item 
+bool \mbox{\hyperlink{namespacesimulate_a695fffa4269e47b3b8ad0d7c39df0e09}{save\+\_\+log}} (str logfile, float t, int i, list pos, list vel)
+\item 
+float \mbox{\hyperlink{namespacesimulate_a5f3ff0ae38b95a28c6d47ca7e7d2f59d}{wall\+\_\+time}} (list pos, float vel, float r, int k, int l, list edges)
+\item 
+float \mbox{\hyperlink{namespacesimulate_a9681dd3087aee36883120259a36b65f5}{pair\+\_\+time}} (list x\+\_\+a, list v\+\_\+a, list x\+\_\+b, list v\+\_\+b, float r)
+\item 
+tuple \mbox{\hyperlink{namespacesimulate_aeeabfd491fe1eda70dead4f89e6c98a5}{get\+\_\+next\+\_\+event}} (list p, list v, list boxs, list pairs, float s, list edges)
+\item 
+list \mbox{\hyperlink{namespacesimulate_aed6a85fbc34fdf84c1f13a85fe776d05}{get\+\_\+velocities}} (list pos, list vel, list boxs, list pairs, int n\+\_\+ix)
+\item 
+tuple \mbox{\hyperlink{namespacesimulate_aca0e2b29e0b2c165e570617416c761ae}{fix\+\_\+delta}} (list pos, list vel, float r, list edges, int l)
+\item 
+tuple \mbox{\hyperlink{namespacesimulate_a19b9619b50ff43151b79671ca267a36a}{pull\+\_\+apart}} (list pos, list vel, float r, list boxs, list pairs, list n\+\_\+ix)
+\item 
+def \mbox{\hyperlink{namespacesimulate_abafed60bb8fc9484de389fa957c8d5fa}{simulate\+\_\+step}} (p, v, r, bx, pr, edges, t, next\+\_\+e, next\+\_\+e\+\_\+i, dt=0)
+\item 
+def \mbox{\hyperlink{namespacesimulate_acd9c67c8ab3b5f1e674a82fccd7b882f}{run\+\_\+simulation}} (n, p, v, r, edges, n\+\_\+events, dt, stepsize, out, logfile)
+\item 
+def \mbox{\hyperlink{namespacesimulate_ae9e1abd92154119360fcb86289683040}{simulation\+\_\+with\+\_\+fan}} (n, orig\+\_\+n, p, v, r, t, edges, n\+\_\+events, fan\+\_\+speed, height, dt, stepsize, out, logfile)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespacesimulate_a9ee71b5890343ff430e8eb6a3cbe8580}\label{namespacesimulate_a9ee71b5890343ff430e8eb6a3cbe8580}} 
+{\bfseries particle\+\_\+shower} = initialize.\+particle\+\_\+shower
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}EdMD simulation
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacesimulate_aca0e2b29e0b2c165e570617416c761ae}\label{namespacesimulate_aca0e2b29e0b2c165e570617416c761ae}} 
+\index{simulate@{simulate}!fix\_delta@{fix\_delta}}
+\index{fix\_delta@{fix\_delta}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{fix\_delta()}{fix\_delta()}}
+{\footnotesize\ttfamily  tuple simulate.\+fix\+\_\+delta (\begin{DoxyParamCaption}\item[{list}]{pos,  }\item[{list}]{vel,  }\item[{float}]{r,  }\item[{list}]{edges,  }\item[{int}]{l }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Basically bug fix:
+- there may be disks that didn't collide with wall,
+  and are now overlapping with it; bounce em back
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_a0ee677cd8c02c2f95ddf89929f5aa834}\label{namespacesimulate_a0ee677cd8c02c2f95ddf89929f5aa834}} 
+\index{simulate@{simulate}!get\_bx\_pr@{get\_bx\_pr}}
+\index{get\_bx\_pr@{get\_bx\_pr}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{get\_bx\_pr()}{get\_bx\_pr()}}
+{\footnotesize\ttfamily  tuple simulate.\+get\+\_\+bx\+\_\+pr (\begin{DoxyParamCaption}\item[{int}]{n }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create wall and pair permutations of disks
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_aeeabfd491fe1eda70dead4f89e6c98a5}\label{namespacesimulate_aeeabfd491fe1eda70dead4f89e6c98a5}} 
+\index{simulate@{simulate}!get\_next\_event@{get\_next\_event}}
+\index{get\_next\_event@{get\_next\_event}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{get\_next\_event()}{get\_next\_event()}}
+{\footnotesize\ttfamily  tuple simulate.\+get\+\_\+next\+\_\+event (\begin{DoxyParamCaption}\item[{list}]{p,  }\item[{list}]{v,  }\item[{list}]{boxs,  }\item[{list}]{pairs,  }\item[{float}]{s,  }\item[{list}]{edges }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Find which event happens next
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_aed6a85fbc34fdf84c1f13a85fe776d05}\label{namespacesimulate_aed6a85fbc34fdf84c1f13a85fe776d05}} 
+\index{simulate@{simulate}!get\_velocities@{get\_velocities}}
+\index{get\_velocities@{get\_velocities}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{get\_velocities()}{get\_velocities()}}
+{\footnotesize\ttfamily  list simulate.\+get\+\_\+velocities (\begin{DoxyParamCaption}\item[{list}]{pos,  }\item[{list}]{vel,  }\item[{list}]{boxs,  }\item[{list}]{pairs,  }\item[{int}]{n\+\_\+ix }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Change velocities after event
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_a9681dd3087aee36883120259a36b65f5}\label{namespacesimulate_a9681dd3087aee36883120259a36b65f5}} 
+\index{simulate@{simulate}!pair\_time@{pair\_time}}
+\index{pair\_time@{pair\_time}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{pair\_time()}{pair\_time()}}
+{\footnotesize\ttfamily  float simulate.\+pair\+\_\+time (\begin{DoxyParamCaption}\item[{list}]{x\+\_\+a,  }\item[{list}]{v\+\_\+a,  }\item[{list}]{x\+\_\+b,  }\item[{list}]{v\+\_\+b,  }\item[{float}]{r }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Time before two particles hit each other
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_a19b9619b50ff43151b79671ca267a36a}\label{namespacesimulate_a19b9619b50ff43151b79671ca267a36a}} 
+\index{simulate@{simulate}!pull\_apart@{pull\_apart}}
+\index{pull\_apart@{pull\_apart}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{pull\_apart()}{pull\_apart()}}
+{\footnotesize\ttfamily  tuple simulate.\+pull\+\_\+apart (\begin{DoxyParamCaption}\item[{list}]{pos,  }\item[{list}]{vel,  }\item[{float}]{r,  }\item[{list}]{boxs,  }\item[{list}]{pairs,  }\item[{list}]{n\+\_\+ix }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Another bug fix:
+- if, by chance, two disks are overlapping,
+  pull them apart
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_acd9c67c8ab3b5f1e674a82fccd7b882f}\label{namespacesimulate_acd9c67c8ab3b5f1e674a82fccd7b882f}} 
+\index{simulate@{simulate}!run\_simulation@{run\_simulation}}
+\index{run\_simulation@{run\_simulation}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{run\_simulation()}{run\_simulation()}}
+{\footnotesize\ttfamily def simulate.\+run\+\_\+simulation (\begin{DoxyParamCaption}\item[{}]{n,  }\item[{}]{p,  }\item[{}]{v,  }\item[{}]{r,  }\item[{}]{edges,  }\item[{}]{n\+\_\+events,  }\item[{}]{dt,  }\item[{}]{stepsize,  }\item[{}]{out,  }\item[{}]{logfile }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Run Molecular Dynamics simulation
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_a695fffa4269e47b3b8ad0d7c39df0e09}\label{namespacesimulate_a695fffa4269e47b3b8ad0d7c39df0e09}} 
+\index{simulate@{simulate}!save\_log@{save\_log}}
+\index{save\_log@{save\_log}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{save\_log()}{save\_log()}}
+{\footnotesize\ttfamily  bool simulate.\+save\+\_\+log (\begin{DoxyParamCaption}\item[{str}]{logfile,  }\item[{float}]{t,  }\item[{int}]{i,  }\item[{list}]{pos,  }\item[{list}]{vel }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Save simulation data in log file
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_abafed60bb8fc9484de389fa957c8d5fa}\label{namespacesimulate_abafed60bb8fc9484de389fa957c8d5fa}} 
+\index{simulate@{simulate}!simulate\_step@{simulate\_step}}
+\index{simulate\_step@{simulate\_step}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{simulate\_step()}{simulate\_step()}}
+{\footnotesize\ttfamily def simulate.\+simulate\+\_\+step (\begin{DoxyParamCaption}\item[{}]{p,  }\item[{}]{v,  }\item[{}]{r,  }\item[{}]{bx,  }\item[{}]{pr,  }\item[{}]{edges,  }\item[{}]{t,  }\item[{}]{next\+\_\+e,  }\item[{}]{next\+\_\+e\+\_\+i,  }\item[{}]{dt = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Run one step of simulation
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_ae9e1abd92154119360fcb86289683040}\label{namespacesimulate_ae9e1abd92154119360fcb86289683040}} 
+\index{simulate@{simulate}!simulation\_with\_fan@{simulation\_with\_fan}}
+\index{simulation\_with\_fan@{simulation\_with\_fan}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{simulation\_with\_fan()}{simulation\_with\_fan()}}
+{\footnotesize\ttfamily def simulate.\+simulation\+\_\+with\+\_\+fan (\begin{DoxyParamCaption}\item[{}]{n,  }\item[{}]{orig\+\_\+n,  }\item[{}]{p,  }\item[{}]{v,  }\item[{}]{r,  }\item[{}]{t,  }\item[{}]{edges,  }\item[{}]{n\+\_\+events,  }\item[{}]{fan\+\_\+speed,  }\item[{}]{height,  }\item[{}]{dt,  }\item[{}]{stepsize,  }\item[{}]{out,  }\item[{}]{logfile }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Run Molecular Dynamics simulation with pressure gradient
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacesimulate_a5f3ff0ae38b95a28c6d47ca7e7d2f59d}\label{namespacesimulate_a5f3ff0ae38b95a28c6d47ca7e7d2f59d}} 
+\index{simulate@{simulate}!wall\_time@{wall\_time}}
+\index{wall\_time@{wall\_time}!simulate@{simulate}}
+\doxysubsubsection{\texorpdfstring{wall\_time()}{wall\_time()}}
+{\footnotesize\ttfamily  float simulate.\+wall\+\_\+time (\begin{DoxyParamCaption}\item[{list}]{pos,  }\item[{float}]{vel,  }\item[{float}]{r,  }\item[{int}]{k,  }\item[{int}]{l,  }\item[{list}]{edges }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Time before a particle hits a wall
+\end{DoxyVerb}
+ 

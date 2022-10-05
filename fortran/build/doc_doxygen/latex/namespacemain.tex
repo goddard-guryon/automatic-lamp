@@ -1,0 +1,83 @@
+\hypertarget{namespacemain}{}\doxysection{main Namespace Reference}
+\label{namespacemain}\index{main@{main}}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacemain_ac3a545f61f5f34f460ee4c5f3153e9a4}{cli}}
+\item 
+\mbox{\Hypertarget{namespacemain_ad78f5fadc8e48752b92395e99eec4033}\label{namespacemain_ad78f5fadc8e48752b92395e99eec4033}} 
+{\bfseries default}
+\item 
+\mbox{\Hypertarget{namespacemain_add4e4c9e96030cc8c55af23e1b21a1c1}\label{namespacemain_add4e4c9e96030cc8c55af23e1b21a1c1}} 
+{\bfseries type}
+\item 
+\mbox{\Hypertarget{namespacemain_a1fdabe2077f86bd72dbb433530b1f192}\label{namespacemain_a1fdabe2077f86bd72dbb433530b1f192}} 
+{\bfseries help}
+\item 
+\mbox{\Hypertarget{namespacemain_a8caf000aeea5b806d0ff58a15f0dd4ce}\label{namespacemain_a8caf000aeea5b806d0ff58a15f0dd4ce}} 
+{\bfseries e10}
+\item 
+\mbox{\Hypertarget{namespacemain_af65ea1f7cf2ee4911befba82862a89dc}\label{namespacemain_af65ea1f7cf2ee4911befba82862a89dc}} 
+{\bfseries int}
+\item 
+\mbox{\Hypertarget{namespacemain_ad58e82b6af113887c15fd471f16724af}\label{namespacemain_ad58e82b6af113887c15fd471f16724af}} 
+{\bfseries choices}
+\item 
+\mbox{\Hypertarget{namespacemain_ae6f9d198e2e8ce359cb2032b4d2d9d3e}\label{namespacemain_ae6f9d198e2e8ce359cb2032b4d2d9d3e}} 
+{\bfseries False}
+\item 
+\mbox{\Hypertarget{namespacemain_af9260f2ed665a3dc15f416f64de3ded9}\label{namespacemain_af9260f2ed665a3dc15f416f64de3ded9}} 
+{\bfseries None}
+\item 
+\mbox{\Hypertarget{namespacemain_a10926d7b7053badc9647defe0abb8adc}\label{namespacemain_a10926d7b7053badc9647defe0abb8adc}} 
+{\bfseries args} = cli.\+parse\+\_\+args(args=None if argv\mbox{[}1\+:\mbox{]} else \mbox{[}\char`\"{}-\/-\/help\char`\"{}\mbox{]})
+\item 
+dictionary \mbox{\hyperlink{namespacemain_a21c70931c886a9c2c04269bfc661ab97}{arg\+\_\+dct}}
+\item 
+\mbox{\Hypertarget{namespacemain_a00493f7dad7bc5bb67ad343be0d143f3}\label{namespacemain_a00493f7dad7bc5bb67ad343be0d143f3}} 
+{\bfseries instance} = \mbox{\hyperlink{classwrapper_1_1MazeDiffusion}{Maze\+Diffusion}}(args.\+num, args.\+height, args.\+width, $\ast$$\ast$arg\+\_\+dct)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Interface file
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{namespacemain_a21c70931c886a9c2c04269bfc661ab97}\label{namespacemain_a21c70931c886a9c2c04269bfc661ab97}} 
+\index{main@{main}!arg\_dct@{arg\_dct}}
+\index{arg\_dct@{arg\_dct}!main@{main}}
+\doxysubsubsection{\texorpdfstring{arg\_dct}{arg\_dct}}
+{\footnotesize\ttfamily dictionary main.\+arg\+\_\+dct}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 =  \{\textcolor{stringliteral}{"{}dt"{}}: args.dt,}
+\DoxyCodeLine{2            \textcolor{stringliteral}{"{}logfile"{}}: args.logfile,}
+\DoxyCodeLine{3            \textcolor{stringliteral}{"{}snapdir"{}}: args.snapdir,}
+\DoxyCodeLine{4            \textcolor{stringliteral}{"{}stepsize"{}}: args.stepsize,}
+\DoxyCodeLine{5            \textcolor{stringliteral}{"{}with\_arrows"{}}: args.arrows,}
+\DoxyCodeLine{6            \textcolor{stringliteral}{"{}from\_file"{}}: args.i\_file,}
+\DoxyCodeLine{7            \textcolor{stringliteral}{"{}to\_file"{}}: args.o\_file,}
+\DoxyCodeLine{8            \textcolor{stringliteral}{"{}maze"{}}: args.maze\_i,}
+\DoxyCodeLine{9            \textcolor{stringliteral}{"{}positions"{}}: args.pos\_i,}
+\DoxyCodeLine{10            \textcolor{stringliteral}{"{}velocities"{}}: args.vel\_i,}
+\DoxyCodeLine{11            \textcolor{stringliteral}{"{}temp"{}}: args.t\_factor,}
+\DoxyCodeLine{12            \textcolor{stringliteral}{"{}pressure\_factor"{}}: args.p\_factor\}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{namespacemain_ac3a545f61f5f34f460ee4c5f3153e9a4}\label{namespacemain_ac3a545f61f5f34f460ee4c5f3153e9a4}} 
+\index{main@{main}!cli@{cli}}
+\index{cli@{cli}!main@{main}}
+\doxysubsubsection{\texorpdfstring{cli}{cli}}
+{\footnotesize\ttfamily main.\+cli}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 =  ArgumentParser(prog=\textcolor{stringliteral}{"{}maze\_diffusion"{}},}
+\DoxyCodeLine{2                      description=\textcolor{stringliteral}{"{}Gas Diffusion in a 2D Maze"{}},}
+\DoxyCodeLine{3                      epilog=\textcolor{stringliteral}{"{}More information at https://github.com/goddard-\/guryon/automatic-\/lamp"{}},}
+\DoxyCodeLine{4                      formatter\_class=MetavarTypeHelpFormatter)}
+
+\end{DoxyCode}

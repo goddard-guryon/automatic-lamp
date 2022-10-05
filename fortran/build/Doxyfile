@@ -1,0 +1,5 @@
+PROJECT_NAME = MazeDiffusion
+INPUT = /home/goddard/git_repos/automatic-lamp/fortran
+OUTPUT_DIRECTORY = /home/goddard/git_repos/automatic-lamp/fortran/build/doc_doxygen/
+OPTIMIZE_FOR_FORTRAN = YES
+EXTENSION_MAPPING = f90=FortranFree
