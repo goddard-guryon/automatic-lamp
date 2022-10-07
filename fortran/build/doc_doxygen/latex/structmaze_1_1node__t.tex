@@ -1,26 +1,36 @@
 \hypertarget{structmaze_1_1node__t}{}\doxysection{maze\+::node\+\_\+t Type Reference}
 \label{structmaze_1_1node__t}\index{maze::node\_t@{maze::node\_t}}
+
+
+node object for tree construction Only used for generation of the tree for maze construction  
+
+
 \doxysubsection*{Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{structmaze_1_1node__t_a0e0bf0493f0e2254546f7b6fd6521b4b}\label{structmaze_1_1node__t_a0e0bf0493f0e2254546f7b6fd6521b4b}} 
-integer {\bfseries id}
+\mbox{\Hypertarget{structmaze_1_1node__t_aed80514490df65ea4d058d28b3ff7b27}\label{structmaze_1_1node__t_aed80514490df65ea4d058d28b3ff7b27}} 
+integer, public {\bfseries id}
 \item 
 \mbox{\Hypertarget{structmaze_1_1node__t_ac6d3f6deb886f2dc7656b75d95f0448c}\label{structmaze_1_1node__t_ac6d3f6deb886f2dc7656b75d95f0448c}} 
 integer {\bfseries n\+\_\+nbrs} = 0
 \item 
-\mbox{\Hypertarget{structmaze_1_1node__t_a23744e1593f9f2179fa5c72843e1428b}\label{structmaze_1_1node__t_a23744e1593f9f2179fa5c72843e1428b}} 
-integer {\bfseries nbr\+\_\+0} = 0
-\item 
-\mbox{\Hypertarget{structmaze_1_1node__t_abc2b9c244238b3a6b8c7733d6e57c2f1}\label{structmaze_1_1node__t_abc2b9c244238b3a6b8c7733d6e57c2f1}} 
-integer {\bfseries nbr\+\_\+1} = 0
-\item 
-\mbox{\Hypertarget{structmaze_1_1node__t_abab526028fafee1c444842db706a28a2}\label{structmaze_1_1node__t_abab526028fafee1c444842db706a28a2}} 
-integer {\bfseries nbr\+\_\+2} = 0
-\item 
-\mbox{\Hypertarget{structmaze_1_1node__t_a3692f0e2f01524016019277bc84c09a0}\label{structmaze_1_1node__t_a3692f0e2f01524016019277bc84c09a0}} 
-integer {\bfseries nbr\+\_\+3} = 0
+\mbox{\Hypertarget{structmaze_1_1node__t_a18c032d062abba82bba816f2765dd557}\label{structmaze_1_1node__t_a18c032d062abba82bba816f2765dd557}} 
+integer, dimension(4) {\bfseries nbrs} = 0
 \end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+node object for tree construction Only used for generation of the tree for maze construction 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & ID of the node \\
+\hline
+{\em n\+\_\+nbrs} & Number of connected neighbors of the node \\
+\hline
+{\em nbrs} & Array of IDs of connected neighbors \\
+\hline
+\end{DoxyParams}
 
 
 The documentation for this type was generated from the following file\+:\begin{DoxyCompactItemize}

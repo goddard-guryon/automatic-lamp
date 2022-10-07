@@ -198,9 +198,6 @@ DOXYGEN_DOT_EXECUTABLE:FILEPATH=/usr/bin/dot
 //Doxygen documentation generation tool (http://www.doxygen.org)
 DOXYGEN_EXECUTABLE:FILEPATH=/usr/bin/doxygen
 
-//The directory containing a CMake configuration file for doxygen-cmake.
-doxygen-cmake_DIR:PATH=doxygen-cmake_DIR-NOTFOUND
-
 //Value Computed by CMake
 testing_cmake_BINARY_DIR:STATIC=/home/goddard/git_repos/automatic-lamp/fortran/build
 

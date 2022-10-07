@@ -34,10 +34,12 @@ n = 6
 with open("edges.txt", 'r') as file:
     edge, tmp = [], []
     for line in file.readlines():
-        fw = line.rstrip()[2:-2].split(') => (')
-        fw = [tuple(int(y) for y in x.split(',')) for x in fw]
-        edges.append(fw)
-print(edges)
+        if line.startswith('['):
+            fw = line.rstrip()[2:-2].split(') => (')
+            fw = [tuple(int(y) for y in x.split(',')) for x in fw]
+            edges.append(fw)
+        else:
+            print(line)
 save_snap(edges)
 
 
