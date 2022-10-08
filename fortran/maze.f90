@@ -28,7 +28,8 @@ contains
     function get_nbrs(k, m, n) result(nbrs)
         implicit none
         integer, intent(in) :: k, m, n
-        integer :: nbrs(4), i
+        integer :: nbrs(4), i, tmp
+        real :: rnd
         nbrs = 0
         i = 1
 
@@ -52,6 +53,16 @@ contains
             nbrs(i) = k + n
             i = i + 1
         end if
+
+        ! need to shuffle the neighbors, to add more randomness to
+        ! maze structure; thus, Fisher-Yates
+        do i = 1, size(nbrs)-1
+            tmp = nbrs(i)
+            call random_number(rnd)
+            rnd = (size(nbrs)-i)*rnd + i  ! transpose [0, 1] => [i, size(nbrs)]
+            nbrs(i) = nbrs(int(rnd))
+            nbrs(int(rnd)) = tmp
+        end do
     end function get_nbrs
 
     !> @brief Add a child node
@@ -93,6 +104,58 @@ contains
         end if
     end function add_child
 
+
+    !> @brief add any orphan nodes into tree
+    !> If there are any nodes in the tree which haven't been
+    !> visited yet, connect them to their nearest neighbor
+    !> that has been visited. Supporting suburoutine for maze_grid function.
+    !> @param m Height of maze
+    !> @param n Width of maze
+    !> @param tree Preliminary tree structure
+    subroutine fix_grid(m, n, tree)
+        implicit none
+        type(node_t), intent(inout) :: tree(m*n)
+        integer, intent(in) :: m, n
+        integer :: i, j, nbrs(4)
+
+        ! we may need multiple passes
+        guard: do while (.true.)
+
+            ! iterate over current tree structure
+            do i = 1, size(tree)
+
+                ! if any node is unconnected
+                if (tree(i)%n_nbrs == 0) then
+
+                    ! create a node here
+                    tree(i) = node_t(id=i, n_nbrs=0)
+
+                    ! find its nearest connected neighbor
+                    nbrs = get_nbrs(i, m, n)
+                    joiner: do j = 1, size(nbrs)
+
+                        ! if this neighbor is connected, join to it
+                        if (nbrs(j) /= 0) then
+                            if (tree(nbrs(j))%id /= 0) then
+                                tree(nbrs(j)) = add_child(tree, tree(i), nbrs(j))
+                                tree(i)%n_nbrs = tree(i)%n_nbrs + 1
+
+                                ! no need to join multiple times
+                                exit joiner
+                            end if
+                        end if
+                    end do joiner
+                end if
+            end do
+
+            ! if all nodes have been joined, leave
+            do i = 1, size(tree)
+                if (tree(i)%n_nbrs == 0) exit
+            end do
+            if (i >= size(tree)) exit guard
+        end do guard
+    end subroutine fix_grid
+
     !> @brief Generation of maze path as a tree
     !> This generates the tree object as an array of nodes
     !> which corresponds to a path through the maze.
@@ -100,9 +163,9 @@ contains
     !> @param n The number of columns (width) of maze
     !> @return tree Array of node_t objects
     function maze_grid(m, n) result(tree)
-        use, intrinsic :: iso_fortran_env, only : output_unit
         implicit none
         integer, intent(in) :: m, n
+        real, parameter :: strength = 0.1  ! 0-1; higher value -> maze more open
         integer :: current(m*n), covered(m*n), i, j, nbrs(4), check, root
         type(node_t) :: tree(m*n)
         type(node_t), target :: new_node
@@ -135,9 +198,13 @@ contains
                 if (tree(i)%n_nbrs == 0) check = check + 1
             end do
             if (check == 0) exit guard
+            check = 0
 
             ! keep propagating until we have nowhere to go
-            do while (any(covered == 0))
+            prop: do while (any(covered == 0))
+
+                ! we might just get stuck going nowhere, watch out for that too
+                check = check + 1
 
                 ! propagate at each block
                 do i = 1, size(tree)
@@ -148,9 +215,12 @@ contains
                         call random_number(rnd)
                         more: do j = 1, 4
 
-                            ! if we have at least two neighbors, we can leave
+                            ! if we have at least two neighbors, consider leaving
                             if (tree(i)%n_nbrs > 1) then
-                                if (rnd(j) > 0.9) then
+
+                                ! strength is just 1 - probability threshold i.e. strength = 0.3
+                                ! means at any step, we have 70% chance of leaving
+                                if (rnd(j) > strength) then
                                     exit more
                                 end if
                             end if
@@ -173,9 +243,20 @@ contains
                     end if
                 end do
 
-                ! for some reason, I still need to do this :/
-                if (all(covered /= 0)) exit guard
+                ! check if we're stuck, but let it run for sufficiently long first
+                if (check > 50*m*n) exit prop
+            end do prop
+
+            ! pull in any left out nodes
+            call fix_grid(m, n, tree)
+
+            ! let's make sure regardless
+            do i = 1, size(tree)
+                if (tree(i)%n_nbrs /= 0) then
+                    covered(i) = 1
+                end if
             end do
+            if (all(covered /= 0)) exit guard
         end do guard
     end function maze_grid
 
@@ -238,35 +319,33 @@ contains
         implicit none
         integer, intent(in) :: x, y, n
         integer :: i, j
-        integer :: e(2, 2)
+        integer :: e(4)
 
         i = x/n + 1
         j = mod(x, n)
         if (j == 0) j = n
-        !i = x
-        !j = y
 
         ! idk why but I can't assign it all in one line /)-_-)
         if (y == x-n) then  ! bottom wall: bottom-left to bottom-right
-            e(1, 1) = i-1
-            e(1, 2) = j-1 
-            e(2, 1) = i-1
-            e(2, 2) = j
+            e(1) = i-1
+            e(2) = j-1 
+            e(3) = i-1
+            e(4) = j
         else if (y == x+n) then  ! top wall: top-left to top-right
-            e(1, 1) = i-1
-            e(1, 2) = j
-            e(2, 1) = i
-            e(2, 2) = j
+            e(1) = i-1
+            e(2) = j
+            e(3) = i
+            e(4) = j
         else if (y == x-1) then  ! left wall: bottom-left to top-left
-            e(1, 1) = i-1
-            e(1, 2) = j-1
-            e(2, 1) = i-1
-            e(2, 2) = j
+            e(1) = i-1
+            e(2) = j-1
+            e(3) = i-1
+            e(4) = j
         else if (y == x+1) then  ! right wall: bottom-right to top-right
-            e(1, 1) = i
-            e(1, 2) = j-1
-            e(2, 1) = i
-            e(2, 2) = j
+            e(1) = i
+            e(2) = j-1
+            e(3) = i
+            e(4) = j
         end if
     end function get_edge
 
@@ -278,11 +357,12 @@ contains
     !> @param n Width of maze
     !> @return edges List of edges in 
     function make_maze(m, n) result(edges)
+        use, intrinsic :: iso_fortran_env, only : output_unit
         implicit none
         integer, intent(in) :: m, n
         type(node_t) :: tree(m*n)
-        integer :: a, i, j, k = 0, l, buf(8*m*n, 2, 2), edge(2, 2), tmp(2), nbr_lst(4)
-        integer, allocatable :: edges(:, :, :)
+        integer :: a, i, j, k = 0, l, buf(8*m*n, 4), nbr_lst(4), edge(4)
+        integer, allocatable :: edges(:, :)
 
         tree = maze_grid(m, n)
         k = 1
@@ -302,28 +382,25 @@ contains
                     prune_f: do j = 1, a
 
                         ! don't want to add redundant edges
-                        if (all(buf(j, :, :) == edge)) then
+                        if (all(buf(j, :) == edge)) then
                             exit prune_f
                         end if
                         if (j == k) then
-                            buf(k, :, :) = edge(:, :)
+                            buf(k, :) = edge(:)
                             k = k + 1
                             exit prune_f
                         end if
                     end do prune_f
 
-                    ! reverse edge
-                    tmp = edge(1, :)
-                    edge(1, :) = edge(2, :)
-                    edge(2, :) = tmp
+                    edge = [edge(3), edge(4), edge(1), edge(2)]
 
                     ! it's tradeoff between size and speed, but I prefer size
                     prune_r: do j = 1, a
-                        if (all(buf(j, :, :) == edge)) then
+                        if (all(buf(j, :) == edge)) then
                             exit prune_r
                         end if
                         if (j == k) then
-                            buf(k, :, :) = edge(:, :)
+                            buf(k, :) = edge(:)
                             k = k + 1
                             exit prune_r
                         end if
@@ -332,23 +409,45 @@ contains
             end do
         end do
 
+        ! add borders
+        do i = 0, m-1
+
+            ! left border
+            buf(k, :) = [0, i, 0, i+1]
+            buf(k+1, :) = [0, i+1, 0, i]
+
+            ! right border
+            buf(k+2, :) = [n, i, n, i+1]
+            buf(k+3, :) = [n, i+1, n, i]
+            k = k + 4
+        end do
+        do i = 0, n-1
+
+            ! bottom border
+            buf(k, :) = [i, 0, i+1, 0]
+            buf(k+1, :) = [i+1, 0, i, 0]
+
+            ! top border
+            buf(k+2, :) = [i, m, i+1, m]
+            buf(k+3, :) = [i+1, m, i, m]
+            k = k + 4
+        end do
+
         ! now create a new array of this size
-        allocate(edges(k, 2, 2))
+        allocate(edges(k, 4))
         do i = 1, k
-            edges(i, :, :) = buf(i, :, :)
-            call f_print_edge(buf(i, :, :))
+            edges(i, :) = buf(i, :)
         end do
     end function make_maze
 end module maze
 program main
-    use, intrinsic :: iso_fortran_env, only : int16, int32, real32
+    use, intrinsic :: iso_fortran_env, only : int16, int32, real32, output_unit
     use :: maze
     implicit none
-    integer :: edges(120, 2, 2)
-    edges = make_maze(5, 6)
-    !do i = 1, size(edges, 1)
-    !    if (.not. any(edges(i, :, :) == 0)) then
-    !        call f_print(edges(i, :, :))
-    !    end if
-    !end do
+    integer, allocatable :: output(:, :)
+    integer :: i
+    output = make_maze(10, 10)
+    do i = 1, size(output, 1)
+        call f_print_edge(output(i, :))
+    end do
 end program main

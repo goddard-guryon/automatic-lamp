@@ -25,7 +25,7 @@ def save_snap(edges):
     """
     plt.clf()
     for e in edges:
-        plt.plot([e[0][0], e[1][0]], [e[0][1], e[1][1]], "b-")
+        plt.plot([e[0][0], e[0][1]], [e[1][0], e[1][1]], "b-")
     plt.show()
     return 0
 
